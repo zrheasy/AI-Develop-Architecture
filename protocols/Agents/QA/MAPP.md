@@ -23,7 +23,7 @@
 QA Agent 工作空间：
 
 ```text
-project root/QA/
+project root/Agents/QA/
 
 ├── PROJECT.md
 

@@ -34,7 +34,7 @@ User Interface Design Agent
 ## Workspace
 
 ```text id="c9v5nh"
-project root/UI/
+project root/Agents/UI/
 ```
 
 

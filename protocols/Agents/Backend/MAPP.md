@@ -23,7 +23,7 @@
 Backend Agent 工作空间：
 
 ```text
-project root/Backend/
+project root/Agents/Backend/
 
 ├── PROJECT.md
 

@@ -151,7 +151,7 @@ Project/
 │   │
 │   └── QA/
 │
-└── {Agent}/（Agent 工作空间，不包含协议文件）
+└── Agents/{Agent}/（Agent 工作空间，不包含协议文件）
 ```
 
 Task 按 Agent 分类，任务文件原地存放，不按状态移动。

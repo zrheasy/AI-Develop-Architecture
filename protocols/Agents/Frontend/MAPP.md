@@ -23,7 +23,7 @@
 Frontend Agent 工作空间：
 
 ```text
-project root/Frontend/
+project root/Agents/Frontend/
 
 ├── PROJECT.md
 

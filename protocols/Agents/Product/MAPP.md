@@ -23,7 +23,7 @@
 Product Agent 工作空间：
 
 ```text
-project root/Product/
+project root/Agents/Product/
 
 ├── PROJECT.md
 

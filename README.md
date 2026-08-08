@@ -6,7 +6,7 @@
 
 - 协议文档统一存放于 `protocols/`，项目根目录只保留本 README 作为文档索引。
 - 协议按角色分为项目级协议（`protocols/`）与各 Agent 协议（`protocols/Agents/{Agent}/`）。
-- Agent 工作空间位于根目录 `{Agent}/`，工作空间内不包含协议文件，只包含 `PROJECT.md` / `DECISIONS.md` / `ACTIVE.md` / `workspace/` / `deliverables/`。
+- Agent 工作空间位于根目录 `Agents/{Agent}/`，工作空间内不包含协议文件，只包含 `PROJECT.md` / `DECISIONS.md` / `ACTIVE.md` / `workspace/` / `deliverables/`。
 - 项目级运行时文件（`PROJECT.md` / `ACTIVE.md` / `DECISIONS.md` / `CHANGELOG.md`、`tasks/`、`features/`、`requirements/`、`decisions/`）不属于协议文档，位于项目根目录，由 PM 创建与维护。
 
 ## 目录与命名规范
@@ -18,7 +18,7 @@
 | `tasks/{Agent}/` | 任务索引与任务文件（`INDEX.md` + `TASK-XXX.md`） | PM |
 | `requirements/` | Product Requirement（`PR-XXX.md`） | PM（落库） |
 | `decisions/` | 长期决策（小写文件名，如 `event-content-language.md`） | PM / 相关 Agent |
-| `{Agent}/deliverables/` | 任务交付物，命名 `TASK-{Agent}-{序号}-{英文描述}.md` | 执行 Agent |
+| `Agents/{Agent}/deliverables/` | 任务交付物，命名 `TASK-{Agent}-{序号}-{英文描述}.md` | 执行 Agent |
 | `protocols/` | 协议文档（只读引用，项目级 git 不跟踪） | — |
 
 命名约定：
@@ -26,7 +26,7 @@
 - 目录统一全小写：`tasks/`、`features/`、`requirements/`、`decisions/`。
 - 任务 ID 格式：`TASK-{Agent}-{序号}`，如 `TASK-FE-001`。
 - 交付物文件名使用英文 kebab-case，如 `TASK-BE-001-api-spec.md`；文档内容保持中文。
-- Agent 工作空间（`{Agent}/`）由各 Agent 独立维护版本，不纳入项目级 git。
+- Agent 工作空间（`Agents/{Agent}/`）由各 Agent 独立维护版本，不纳入项目级 git。
 
 ## 阅读规则
 
@@ -57,10 +57,10 @@
 5. `protocols/Agent_Shared_MAPP.md`
 6. `protocols/Agents/{Agent}/MAPP.md`
 7. `protocols/Agents/{Agent}/Capability.md`
-8. `PROJECT.md` 或 `{Agent}/PROJECT.md`（不存在时跳过）
-9. `ACTIVE.md` 或 `{Agent}/ACTIVE.md`（不存在时跳过）
+8. `PROJECT.md` 或 `Agents/{Agent}/PROJECT.md`（不存在时跳过）
+9. `ACTIVE.md` 或 `Agents/{Agent}/ACTIVE.md`（不存在时跳过）
 10. `tasks/{Agent}/INDEX.md`（不存在时跳过）
-11. `DECISIONS.md` 或 `{Agent}/DECISIONS.md`（按需，不存在时跳过）
+11. `DECISIONS.md` 或 `Agents/{Agent}/DECISIONS.md`（按需，不存在时跳过）
 
 ## 按需读取
 

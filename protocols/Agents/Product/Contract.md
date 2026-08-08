@@ -34,7 +34,7 @@ Product Management Agent
 ## Workspace
 
 ```text id="n6q4hs"
-project root/Product/
+project root/Agents/Product/
 ```
 
 

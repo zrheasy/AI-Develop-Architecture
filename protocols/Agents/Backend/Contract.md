@@ -34,7 +34,7 @@ Backend Engineering Agent
 ## Workspace
 
 ```text
-project root/Backend/
+project root/Agents/Backend/
 ```
 
 

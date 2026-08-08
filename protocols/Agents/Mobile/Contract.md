@@ -34,7 +34,7 @@ Mobile Engineering Agent
 ## Workspace
 
 ```text
-project root/Mobile/
+project root/Agents/Mobile/
 ```
 
 

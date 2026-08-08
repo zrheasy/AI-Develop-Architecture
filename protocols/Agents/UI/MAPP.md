@@ -23,7 +23,7 @@
 UI Agent 工作空间：
 
 ```text
-project root/UI/
+project root/Agents/UI/
 
 ├── PROJECT.md
 

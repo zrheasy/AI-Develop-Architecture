@@ -34,7 +34,7 @@ Frontend Engineering Agent
 ## Workspace
 
 ```text
-project root/Frontend/
+project root/Agents/Frontend/
 ```
 
 

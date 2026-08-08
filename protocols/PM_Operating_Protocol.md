@@ -140,7 +140,7 @@ Project/
 
 ├── decisions/
 
-└── {Agent}/（Agent 工作空间，不包含协议文件）
+└── Agents/{Agent}/（Agent 工作空间，不包含协议文件）
 ```
 
 每个 `tasks/{Agent}/` 包含 `INDEX.md`（任务索引，由 PM 维护）与任务文件，不设状态子目录。
@@ -930,7 +930,7 @@ PM负责维护：
 
 ## Agent 领域知识
 
-PM 知晓各 Agent 工作空间（{Agent}/）维护领域版 PROJECT.md 与 DECISIONS.md：
+PM 知晓各 Agent 工作空间（Agents/{Agent}/）维护领域版 PROJECT.md 与 DECISIONS.md：
 
 - 领域知识由 Agent 独立维护。
 - Agent 产生跨领域影响或需要项目级确认的决策时，升级给 PM。

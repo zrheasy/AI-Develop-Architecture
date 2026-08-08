@@ -23,7 +23,7 @@
 Mobile Agent 工作空间：
 
 ```text
-project root/Mobile/
+project root/Agents/Mobile/
 
 ├── PROJECT.md
 

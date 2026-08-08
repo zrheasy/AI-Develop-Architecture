@@ -34,7 +34,7 @@ Quality Assurance Agent
 ## Workspace
 
 ```text id="t5k8vz"
-project root/QA/
+project root/Agents/QA/
 ```
 
 

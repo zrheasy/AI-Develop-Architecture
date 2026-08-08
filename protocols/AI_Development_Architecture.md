@@ -73,7 +73,7 @@ Project
 | Product Requirement | 产品决策摘要 | Product Agent | requirements/ | protocols/Product_Requirement_Specification.md |
 | Feature | 长期产品能力 | PM Agent | features/ | protocols/Feature_Specification.md |
 | Task | 临时执行契约 | PM Agent | tasks/{Agent}/ | protocols/Task_Specification.md |
-| Deliverable | 工作完成的证明 | 执行 Agent | {Agent}/deliverables/ | protocols/Agent_Shared_MAPP.md |
+| Deliverable | 工作完成的证明 | 执行 Agent | Agents/{Agent}/deliverables/ | protocols/Agent_Shared_MAPP.md |
 | Decision | 长期项目决策 | PM / 相关 Agent | decisions/ | protocols/Decisions_Documentation_Standards.md |
 | Release | 产品发布版本 | PM Agent | CHANGELOG.md | — |
 
@@ -247,7 +247,7 @@ Agent_Contract → Agent MAPP → CAPABILITY → PROJECT → ACTIVE → TASK →
 每个 Agent 的工作空间位于：
 
 ```text
-project root/{Agent}/
+project root/Agents/{Agent}/
 ```
 
 工作空间结构、各文件作用、workspace/ 与 deliverables/ 的说明见：

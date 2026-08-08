@@ -28,7 +28,7 @@
 Agent 工作空间位于：
 
 ```text
-project root/{Agent}/
+project root/Agents/{Agent}/
 ```
 
 工作空间只包含上下文文件与工程资产，不包含协议文件。协议文件（CONTRACT.md / MAPP.md / CAPABILITY.md）统一存放于：
@@ -242,7 +242,7 @@ Agent 收到 PM 发出的「初始化工作空间」任务后，**自动**完成
 工作空间位置：
 
 ```text
-project root/{Agent}/
+project root/Agents/{Agent}/
 ```
 
 工作空间内不包含协议文件；协议文件位于 protocols/Agents/{Agent}/，只读引用，不复制、不修改。
