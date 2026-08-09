@@ -28,6 +28,10 @@
 - 交付物文件名使用英文 kebab-case，如 `TASK-BE-001-api-spec.md`；文档内容保持中文。
 - Agent 工作空间（`Agents/{Agent}/`）由各 Agent 独立维护版本，不纳入项目级 git。
 
+## 协作规则
+
+- PM Agent 向 Agent 分配任务时，使用 subagent 的方式。
+
 ## 阅读规则
 
 1. 唯一入口：`protocols/AI_Development_Architecture.md`，先读它。
