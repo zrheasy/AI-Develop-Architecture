@@ -1,6 +1,6 @@
 # PM Operating Protocol
 
-**版本：** 1.1
+**版本：** 1.2
 
 **定位：**
 
@@ -1190,3 +1190,14 @@ PM 只验证交付物是否满足 Task 和 Product Requirement，包括：
 - 是否需要追加 Task 或 Decision。
 
 PM 不重复实现 Agent 工作，不把专业实现细节复制到项目治理文档。
+
+## 17.4 开发分支与合并边界
+
+开发类 Agent workspace 长期保留 `main` 与 `dev`：
+
+- 新 Feature 必须从最新 `dev` 创建 Feature 分支。
+- Feature 完成后由对应开发 Agent 合并回 `dev`。
+- QA 通过、测试和构建通过、发布记录准备完成后，由对应开发 Agent 将 `dev` 合并到 `main`。
+- PM 只确认分支状态、Task 完成状态、QA 结果和发布许可，不直接修改代码、不直接处理开发分支冲突、不代替开发 Agent 合并代码。
+
+开发类 Agent 未提交 commit hash、分支名和合并目标分支时，PM 不得通过该 Task。

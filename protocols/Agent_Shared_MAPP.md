@@ -1,6 +1,6 @@
 # Agent Shared MAPP（Agent 通用工作协议）
 
-**版本：** 1.2
+**版本：** 1.3
 
 **定位：**
 
@@ -786,3 +786,68 @@ Blockers: 无 / 阻塞说明
 ## 14.3 PM 边界提醒
 
 Agent 发现 PM 或其他角色越权修改执行域时，应立即停止扩大修改范围并反馈 PM；不得自行替代 PM 维护治理文件，也不得替代其他 Agent 修复其领域内容。
+
+---
+
+# 15. 开发类 Agent 分支与提交协议
+
+## 15.1 适用范围
+
+本协议适用于 Frontend、Backend、Mobile 等开发类 Agent 的独立 workspace。Product、UI、QA Agent 不强制采用本分支模型。
+
+## 15.2 长期分支
+
+每个开发类 Agent workspace 应长期保留两个分支：
+
+- `main`：已上线或可发布代码，只允许通过 `dev` 合并进入。
+- `dev`：当前开发集成分支，包含已完成但尚未上线的 Feature。
+
+禁止直接在 `main` 或 `dev` 上开发功能。
+
+## 15.3 Feature 分支生命周期
+
+开发新 Feature 时：
+
+1. 从最新 `dev` 创建 `feature/<feature-slug>` 分支。
+2. Agent 在 Feature 分支上执行所属 Task。
+3. 每完成一项 Task，必须提交至少一个 commit。
+4. Feature 完成并通过对应 Agent 自检后，将 Feature 分支合并回 `dev`。
+5. QA 验收通过、工作区干净且发布记录准备完成后，将 `dev` 合并到 `main`。
+
+标准流程：
+
+```text
+dev → feature/<feature-slug> → dev → main
+```
+
+Feature 分支合并前必须先同步最新 `dev`，避免旧分支覆盖集成分支已有修改。
+
+## 15.4 分支命名
+
+- Feature：`feature/<feature-slug>`。
+- 一次性修复：`fix/<task-id>`。
+- 线上紧急修复：`hotfix/<issue-id>`；完成后必须同时合并到 `main` 与 `dev`。
+
+## 15.5 Commit 与交付
+
+开发类 Agent 完成每项 Task 前必须提交 commit，并在 Task 的 `Deliverable` 与自身 `ACTIVE.md` 中记录：
+
+- Commit hash。
+- 分支名。
+- 合并目标分支。
+- 测试摘要。
+
+Commit 必须只包含当前 Task 的改动，使用清晰的 Conventional Commit 信息；不得用一个无关的大 commit 混入多个 Task。
+
+## 15.6 合并职责
+
+对应开发类 Agent 负责自身 workspace 的分支创建、commit、合并与冲突处理。PM 只负责确认分支状态、Task 依赖、QA 结果和发布许可，不直接修改代码或代替开发 Agent 合并代码。
+
+## 15.7 既有 workspace 迁移
+
+既有开发类 workspace 如果尚未具备 `main` 与 `dev`，必须在开始下一项开发 Task 前由对应开发 Agent 完成迁移并验证：
+
+- 保留现有代码和历史 commit。
+- 将当前稳定代码确定为 `main` 基线。
+- 从 `main` 创建 `dev`。
+- 后续 Feature 按本协议从 `dev` 创建分支。

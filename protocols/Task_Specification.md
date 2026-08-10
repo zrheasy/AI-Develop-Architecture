@@ -1,6 +1,6 @@
 # Task Specification
 
-**版本：1.2**
+**版本：1.3**
 
 ---
 
@@ -601,3 +601,32 @@ Blockers: 无 / 阻塞说明
 - Agent 维护执行域：`Agents/{Agent}/workspace/`、`Agents/{Agent}/deliverables/` 及自身 `ACTIVE.md`。
 - PM 不得直接修改执行域代码、测试、配置或设计资产。
 - Agent 不得修改 PM 维护的 Task、INDEX、Feature 或 Product Requirement；发现问题必须反馈 PM。
+
+---
+
+# 13. 开发类 Task 的版本交付要求
+
+Frontend、Backend、Mobile 等开发类 Task 的 `Deliverable` 必须包含：
+
+```markdown
+- Commit: `abc1234`
+- Branch: `feature/<feature-slug>` / `fix/<task-id>`
+- Merge Target: `dev` / `main`
+- Verification: 测试摘要
+```
+
+开发类 Agent 每完成一项 Task，必须先提交 commit，再将 Task 更新为待审核并通知 PM。没有 commit hash 的开发类 Task 不得通过验收。
+
+开发类 workspace 的分支流程为：
+
+```text
+dev → feature/<feature-slug> → dev → main
+```
+
+其中：
+
+- Feature 分支从最新 `dev` 创建。
+- Feature 完成后合并回 `dev`。
+- QA PASS、工作区干净且具备发布记录后，`dev` 才能合并到 `main`。
+- 不允许直接在 `main` 或 `dev` 上开发。
+- 合并冲突由对应开发 Agent 处理，PM 不直接修改代码解决冲突。
