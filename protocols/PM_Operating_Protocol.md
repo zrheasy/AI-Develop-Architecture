@@ -1,6 +1,6 @@
 # PM Operating Protocol
 
-**版本：** 1.0
+**版本：** 1.1
 
 **定位：**
 
@@ -1132,3 +1132,61 @@ Feature / Enhancement / Maintenance？
 ## □ 项目更加清晰
 
 项目是否比之前更容易继续？
+
+---
+
+# 17. 最小协作与职责隔离协议
+
+## 17.1 PM 与 Agent 的最小对话
+
+PM 派发任务时只发送完成任务所必需的信息：
+
+- Task 文件地址。
+- Owner Agent。
+- 前置依赖是否满足。
+- 启动或完成后的下一状态。
+
+Task 已记录的背景、约束与验收标准不在消息中重复展开。
+
+Agent 完成任务时只返回：
+
+```text
+Status: DONE / BLOCKED
+Deliverable: 交付物地址
+Commit: commit hash（如适用）
+Verification: 测试摘要
+Blockers: 无 / 阻塞说明
+```
+
+PM 的中间更新只报告状态变化、阻塞和验收结论，不报告轮询过程、工具调用或重复上下文。
+
+## 17.2 PM 与执行域文件边界
+
+PM 允许维护：
+
+- `PROJECT.md`
+- `ACTIVE.md`
+- `DECISIONS.md`
+- `CHANGELOG.md`
+- `requirements/`
+- `features/`
+- `tasks/`
+
+PM 禁止直接修改：
+
+- `Agents/{Agent}/workspace/` 内的代码、测试和工程配置。
+- `Agents/{Agent}/deliverables/` 内的 Agent 交付内容。
+- UI 设计稿和其他执行域资产。
+
+发现实现问题时，PM 必须创建或调整 Task，交由对应 Agent 修复；不得以“临时修复”或“验证修复”为由直接修改执行域文件。
+
+## 17.3 PM 验收边界
+
+PM 只验证交付物是否满足 Task 和 Product Requirement，包括：
+
+- 交付物地址是否存在。
+- 测试摘要是否可信。
+- 验收标准是否满足。
+- 是否需要追加 Task 或 Decision。
+
+PM 不重复实现 Agent 工作，不把专业实现细节复制到项目治理文档。

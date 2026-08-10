@@ -1,6 +1,6 @@
 # Agent Shared Contract（Agent 通用契约条款）
 
-**版本：** 1.0
+**版本：** 1.1
 
 **定位：**
 
@@ -43,6 +43,31 @@ Agent 不得：
 
 重新分配 Task
 ```
+
+---
+
+# 1.1 最小输出与执行域边界
+
+## Agent 输出
+
+Agent 对 PM 的完成通知只包含：
+
+- 状态：`DONE` 或 `BLOCKED`。
+- 实际 Deliverable 地址。
+- Commit（如适用）。
+- 测试摘要。
+- 阻塞项（如有）。
+
+Task 已提供的信息不在通知中重复展开。
+
+## 执行域边界
+
+Agent 只修改自身负责的执行域文件和自身 `ACTIVE.md`，不得修改：
+
+- PM 维护的 `tasks/`、`requirements/`、`features/`、项目级核心文件。
+- 其他 Agent 的 workspace、deliverables 或决策文件。
+
+需要跨域修改时，必须反馈 PM，由 PM 创建或调整对应 Task。
 
 ---
 

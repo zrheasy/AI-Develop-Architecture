@@ -1,6 +1,6 @@
 # Task Specification
 
-**版本：1.1**
+**版本：1.2**
 
 ---
 
@@ -284,6 +284,22 @@ PASS / FAIL
 审核失败时由 PM 填写。
 ```
 
+## 6.1 Deliverable 地址要求
+
+Task 完成后，Task 文件必须记录可直接访问的实际交付物地址。`Deliverable` 不得只写抽象类型，例如「API 文档」或「Git Commit」。
+
+标准格式：
+
+```markdown
+## Deliverable
+
+- [交付说明](../../Agents/{Agent}/deliverables/TASK-XXX-description.md)
+- Commit: `abc1234`
+- Verification: `41 passed`
+```
+
+交付物文档只记录结果、必要说明、验证摘要和风险；完整过程、代码细节与测试日志保留在代码、测试资产或 Agent workspace 中，不在 Deliverable 中重复。
+
 ---
 
 # 7. PM 创建 Task 流程
@@ -558,3 +574,30 @@ PM Review
 核心原则：
 
 > PM 管理目标和验收，Agent 管理实现和执行，Task 只是连接两者的临时契约。
+
+---
+
+# 12. Task 对话与职责边界
+
+## PM 派发消息
+
+PM 派发消息只引用 Task 文件和必要依赖，不复制 Task 中已有的背景、约束和验收标准。
+
+## Agent 完成消息
+
+Agent 完成消息必须使用最小格式：
+
+```text
+Status: DONE / BLOCKED
+Deliverable: 实际文件地址
+Commit: commit hash（如适用）
+Verification: 测试摘要
+Blockers: 无 / 阻塞说明
+```
+
+## 文件边界
+
+- PM 维护治理域：`PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`、`CHANGELOG.md`、`requirements/`、`features/`、`tasks/`。
+- Agent 维护执行域：`Agents/{Agent}/workspace/`、`Agents/{Agent}/deliverables/` 及自身 `ACTIVE.md`。
+- PM 不得直接修改执行域代码、测试、配置或设计资产。
+- Agent 不得修改 PM 维护的 Task、INDEX、Feature 或 Product Requirement；发现问题必须反馈 PM。
