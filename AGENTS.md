@@ -72,9 +72,9 @@
 | 发布记录 | `CHANGELOG.md`（新项目由 PM 创建初始记录） |
 
 
-## PM调用Agent规则
+## PM派发任务规则
 
-PM Agent 向 Agent 分配任务时，使用 spawn_agent 将任务分派给agent。
+正式派发业务任务前，应先启动并初始化对应 Agent，再进行任务派发：
 - 派 product agent 执行产品经理的任务。
 - 派 ui agent 执行UI的任务。
 - 派 qa agent 执行QA的任务。
