@@ -28,10 +28,6 @@
 - 交付物文件名使用英文 kebab-case，如 `TASK-BE-001-api-spec.md`；文档内容保持中文。
 - Agent 工作空间（`Agents/{Agent}/`）由各 Agent 独立维护版本，不纳入项目级 git。
 
-## 协作规则
-
-- PM Agent 向 Agent 分配任务时，使用 subagent 的方式。
-
 ## 阅读规则
 
 1. 唯一入口：`protocols/AI_Development_Architecture.md`，先读它。
@@ -74,3 +70,14 @@
 | PM 管理 Feature / Task / Product Requirement | `protocols/Feature_Specification.md`、`protocols/Task_Specification.md`、`protocols/Product_Requirement_Specification.md` |
 | 维护三个核心文件 | `protocols/Project_Documentation_Standards.md`、`protocols/Active_Documentation_Standards.md`、`protocols/Decisions_Documentation_Standards.md` |
 | 发布记录 | `CHANGELOG.md`（新项目由 PM 创建初始记录） |
+
+
+## PM调用Agent规则
+
+PM Agent 向 Agent 分配任务时，使用 spawn_agent 将任务分派给agent。
+- 派 product agent 执行产品经理的任务。
+- 派 ui agent 执行UI的任务。
+- 派 qa agent 执行QA的任务。
+- 派 backend agent 执行后端的任务。
+- 派 frontend agent 执行前端的任务。
+- 派 mobile agent 执行移动端的任务。
