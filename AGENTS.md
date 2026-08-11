@@ -2,12 +2,9 @@
 
 本仓库是一套 AI 多 Agent 协作协议（MAPP），不是软件产品。注意：本文件不加入git。
 
-## 目录结构
+## 协议入口
 
-- 协议文档统一存放于 `protocols/`，项目根目录只保留本 README 作为文档索引。
-- 协议按角色分为项目级协议（`protocols/`）与各 Agent 协议（`protocols/Agents/{Agent}/`）。
-- Agent 工作空间位于根目录 `Agents/{Agent}/`，工作空间内不包含协议文件，只包含 `PROJECT.md` / `DECISIONS.md` / `ACTIVE.md` / `workspace/` / `deliverables/`。
-- 项目级运行时文件（`PROJECT.md` / `ACTIVE.md` / `DECISIONS.md` / `CHANGELOG.md`、`tasks/`、`features/`、`requirements/`、`decisions/`）不属于协议文档，位于项目根目录，由 PM 创建与维护。
+协议文档统一存放于 `protocols/`，唯一入口是 `protocols/README.md`：先读它，再按其中「阅读顺序」按角色读取对应文档。协议按两层组织（职责与规范 `protocols/contracts/`、协作流程 `protocols/workflows/`），详细结构、阅读顺序与按需读取见该入口文档。
 
 ## 目录与命名规范
 
@@ -30,47 +27,11 @@
 
 ## 阅读规则
 
-1. 唯一入口：`protocols/AI_Development_Architecture.md`，先读它。
-2. 再按其中第 5 节「获取知识路径」继续。
+1. 唯一入口：`protocols/README.md`，先读它。
+2. 再按其中「阅读顺序」继续。
 3. 只读自己角色的链路，其他角色文档按需才读。
 4. 按顺序阅读，不要跳读，不要通读全部文档。
-5. 标注「按需」的文档需要时才读；标注「不存在时跳过」的文件不存在则直接跳过；项目级核心文件（`PROJECT.md` / `ACTIVE.md` / `DECISIONS.md` / `CHANGELOG.md`）不存在时由 PM 创建，见 `protocols/PM_Operating_Protocol.md`「项目启动协议」。
-
-## PM 阅读顺序
-
-1. `protocols/AI_Development_Architecture.md`
-2. `protocols/PM_Contract.md`
-3. `protocols/ROOT_MAPP.md`
-4. `protocols/PM_Operating_Protocol.md`
-5. `PROJECT.md`（不存在时由 PM 创建）
-6. `ACTIVE.md`（不存在时由 PM 创建）
-7. `DECISIONS.md`（按需，不存在时由 PM 创建骨架）
-
-## Agent 阅读顺序
-
-六个 Agent（Product / UI / Frontend / Backend / Mobile / QA）顺序相同，仅替换 `{Agent}`。
-
-1. `protocols/AI_Development_Architecture.md`
-2. `protocols/Agents/{Agent}/Contract.md`
-3. `protocols/Agent_Shared_Contract.md`
-4. `protocols/ROOT_MAPP.md`
-5. `protocols/Agent_Shared_MAPP.md`
-6. `protocols/Agents/{Agent}/MAPP.md`
-7. `protocols/Agents/{Agent}/Capability.md`
-8. `PROJECT.md` 或 `Agents/{Agent}/PROJECT.md`（不存在时跳过）
-9. `ACTIVE.md` 或 `Agents/{Agent}/ACTIVE.md`（不存在时跳过）
-10. `tasks/{Agent}/INDEX.md`（不存在时跳过）
-11. `DECISIONS.md` 或 `Agents/{Agent}/DECISIONS.md`（按需，不存在时跳过）
-
-## 按需读取
-
-| 场景 | 文档 |
-|---|---|
-| PM 分配 Agent | `protocols/Agent_Directory.md` |
-| PM 管理 Feature / Task / Product Requirement | `protocols/Feature_Specification.md`、`protocols/Task_Specification.md`、`protocols/Product_Requirement_Specification.md` |
-| 维护三个核心文件 | `protocols/Project_Documentation_Standards.md`、`protocols/Active_Documentation_Standards.md`、`protocols/Decisions_Documentation_Standards.md` |
-| 发布记录 | `CHANGELOG.md`（新项目由 PM 创建初始记录） |
-
+5. 标注「按需」的文档需要时才读；标注「不存在时跳过」的文件不存在则直接跳过；项目级核心文件（`PROJECT.md` / `ACTIVE.md` / `DECISIONS.md` / `CHANGELOG.md`）不存在时由 PM 创建，见 `protocols/workflows/PM_Workflow.md`「项目启动协议」。
 
 ## PM派发任务规则
 
