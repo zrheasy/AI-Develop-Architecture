@@ -1,8 +1,8 @@
 # Agent Shared Contract
 
-**版本：** 2.0
+**版本：** 2.1
 
-**定位：** 所有 Agent 文档的共享条款。各 Agent 只保留领域差异（见 `contracts/agents/`）。
+**定位：** PM 与所有 Agent 的共享条款。各角色只保留领域差异（见 `contracts/agents/`）。
 
 ---
 
@@ -15,16 +15,37 @@
 
 # 2. 执行域边界
 
-Agent 只修改自身执行域文件（`Agents/{Agent}/workspace/`、`Agents/{Agent}/deliverables/`）和自身 `ACTIVE.md`，不得修改：
+## Agent 执行域
+
+Agent 只修改自身执行域（`Agents/{Agent}/`）内的文件，不得修改：
 
 - PM 维护的 `tasks/`、`requirements/`、`features/`、项目级核心文件。
-- 其他 Agent 的 workspace、deliverables 或决策文件。
+- 其他 Agent 的工作空间（`Agents/{其他Agent}/`）或决策文件。
 
 需要跨域修改时，反馈 PM，由 PM 创建或调整对应 Task。
 
+## PM 执行域
+
+PM 只维护治理域（`PROJECT.md` / `ACTIVE.md` / `DECISIONS.md` / `CHANGELOG.md`、`requirements/`、`features/`、`tasks/`、`decisions/`），不得修改任何 Agent 工作空间（`Agents/{Agent}/`）内的文件。
+
+用户反馈产品问题时，PM 应创建或调整对应 Task，协调相关 Agent 解决；不得直接修改 Agent 工作空间代为实现或修复。
+
 ---
 
-# 3. 最小输出
+# 3. 最小输入
+
+PM 通知 Agent 时只发送完成任务所必需的信息：
+
+- Task 文件地址。
+- Owner Agent。
+- 前置依赖是否满足。
+- 启动或完成后的下一状态。
+
+具体上下文信息（背景、约束、验收标准等）写入 TASK 文件，不在通知中重复展开。
+
+---
+
+# 4. 最小输出
 
 Agent 对 PM 的完成通知只包含：
 
@@ -40,6 +61,6 @@ Task 已提供的信息不在通知中重复展开。
 
 ---
 
-# 4. Contract 维护
+# 5. Contract 维护
 
 仅当 Agent 职责、组织结构、长期能力范围变化时更新本文件；不因单个 Task、临时需求或一次方案修改。

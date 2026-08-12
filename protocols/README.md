@@ -51,12 +51,13 @@ User Request → Product Requirement → Feature → Task → Deliverable
 
 1. `BASIC_MAPP.md`
 2. `contracts/agents/PM.md`
-3. `workflows/PM_Workflow.md`
-4. `PROJECT.md`（不存在时由 PM 创建）
-5. `ACTIVE.md`（不存在时由 PM 创建）
-6. `DECISIONS.md`（按需，不存在时由 PM 创建骨架）
-7. `workflows/Agent_Directory.md`（分配 Agent 时）
-8. `contracts/specs/`（管理 Feature / Task / PRD 时按需）
+3. `contracts/Agent_Shared_Contract.md`
+4. `workflows/PM_Workflow.md`
+5. `PROJECT.md`（不存在时由 PM 创建）
+6. `ACTIVE.md`（不存在时由 PM 创建）
+7. `DECISIONS.md`（按需，不存在时由 PM 创建骨架）
+8. `workflows/Agent_Directory.md`（分配 Agent 时）
+9. `contracts/specs/`（管理 Feature / Task / PRD 时按需）
 
 ## Agent
 
