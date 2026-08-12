@@ -116,3 +116,28 @@ PM 维护 PROJECT.md / ACTIVE.md / DECISIONS.md / CHANGELOG.md：
 - 初始化项目时在项目根目录执行 git init；项目级 git 不跟踪 `protocols/` 与 `Agents/`，协议文档与各 Agent 工作空间由各自 git 独立管理。
 - 完成一个 Feature（相关 Task 均验收通过）后执行 git commit，记录 Feature 完成。
 - 用户验收通过后，推送项目远程仓库；若尚未创建远程仓库，提示用户创建；同时通知其他 Agent 推送各自远程仓库。
+
+# 10. PM派发任务规则
+
+正式派发业务任务前，按以下顺序处理对应 Agent：
+
+1. Agent 不存在时才创建 Agent；Agent 名称必须使用其职责定位命名，不使用随机昵称或临时名称：
+   - `Product Agent`
+   - `UI Agent`
+   - `QA Agent`
+   - `Backend Agent`
+   - `Frontend Agent`
+   - `Mobile Agent`
+2. Agent 已存在但未启动时，先启动该 Agent，再进行任务派发。
+3. Agent 已启动时直接复用，不得重复创建同一定位的 Agent。
+4. Agent 完成任务后默认保持可复用状态；除非明确不再需要，否则不得主动关闭。
+5. 新 Agent 首次接业务前必须完成工作空间初始化并经 PM 轻验收。
+
+任务分派对象与职责对应关系：
+
+- `Product Agent`：产品经理任务。
+- `UI Agent`：UI 设计任务。
+- `QA Agent`：质量验证任务。
+- `Backend Agent`：后端任务。
+- `Frontend Agent`：前端任务。
+- `Mobile Agent`：移动端任务。

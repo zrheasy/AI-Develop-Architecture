@@ -32,28 +32,3 @@
 3. 只读自己角色的链路，其他角色文档按需才读。
 4. 按顺序阅读，不要跳读，不要通读全部文档。
 5. 标注「按需」的文档需要时才读；标注「不存在时跳过」的文件不存在则直接跳过；项目级核心文件（`PROJECT.md` / `ACTIVE.md` / `DECISIONS.md` / `CHANGELOG.md`）不存在时由 PM 创建，见 `protocols/workflows/PM_Workflow.md`「项目启动协议」。
-
-## PM派发任务规则
-
-正式派发业务任务前，按以下顺序处理对应 Agent：
-
-1. Agent 不存在时才创建 Agent；Agent 名称必须使用其职责定位命名，不使用随机昵称或临时名称：
-   - `Product Agent`
-   - `UI Agent`
-   - `QA Agent`
-   - `Backend Agent`
-   - `Frontend Agent`
-   - `Mobile Agent`
-2. Agent 已存在但未启动时，先启动该 Agent，再进行任务派发。
-3. Agent 已启动时直接复用，不得重复创建同一定位的 Agent。
-4. Agent 完成任务后默认保持可复用状态；除非明确不再需要，否则不得主动关闭。
-5. 新 Agent 首次接业务前必须完成工作空间初始化并经 PM 轻验收。
-
-任务分派对象与职责对应关系：
-
-- `Product Agent`：产品经理任务。
-- `UI Agent`：UI 设计任务。
-- `QA Agent`：质量验证任务。
-- `Backend Agent`：后端任务。
-- `Frontend Agent`：前端任务。
-- `Mobile Agent`：移动端任务。
