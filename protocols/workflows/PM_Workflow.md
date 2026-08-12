@@ -1,6 +1,6 @@
 # PM Workflow
 
-**版本：** 2.0
+**版本：** 2.1
 
 **定位：** PM Agent 的项目协调执行协议，只保留 PM 特有的动作；Agent 通用流程见 `workflows/Agent_Workflow.md`。
 
@@ -21,15 +21,16 @@
 适用：新项目，或项目级核心文件缺失（PROJECT.md / ACTIVE.md / DECISIONS.md / CHANGELOG.md）。
 
 1. 判断初始化状态：四个核心文件存在且有效、PROJECT.md 无「等待确认」、相关 Agent 工作空间已初始化。未初始化先执行本协议，已初始化直接进入需求接收。
-2. 建立目录骨架：README、PROJECT.md、ACTIVE.md、DECISIONS.md、CHANGELOG.md、requirements/、features/、tasks/{Agent}/、decisions/、Agents/{Agent}/。
-3. 创建 PROJECT.md：目标、边界、长期原则、技术背景、Current Phase；产品方向未明确时标注「等待确认」。
-4. 创建 ACTIVE.md / DECISIONS.md / CHANGELOG.md 骨架（标准见 `contracts/specs/`）。
-5. 初始化 Product Agent 工作空间：派发「初始化工作空间」任务，轻验收后分配需求分析任务。
-6. 需求分析：Product Agent 产出 PRD，PM 审核（完整清晰 → APPROVED 落库 requirements/；不完整 → 返回补充）。
-7. 产品形态规划：PM 基于 PRD 决定 MVP 形态、演进路径、长期边界；不确定时询问用户，不自行假设。产出记录到 PROJECT.md 与 DECISIONS.md。
-8. 完善 PROJECT.md：回填「等待确认」字段。
-9. 按需初始化其他 Agent 工作空间：每个 Agent 第一个业务 Task 前先派发「初始化工作空间」任务并轻验收；开发类另确认架构决策与工程骨架。
-10. 完成标志：四个核心文件有效、无「等待确认」、PRD APPROVED、参与业务的 Agent 工作空间验收通过。初始化完成前不得创建业务 Feature / Task。
+2. 在项目根目录执行 git init（已初始化跳过），项目 git 只保留 main 分支。
+3. 建立目录骨架：README、PROJECT.md、ACTIVE.md、DECISIONS.md、CHANGELOG.md、requirements/、features/、tasks/{Agent}/、decisions/、Agents/{Agent}/。
+4. 创建 PROJECT.md：目标、边界、长期原则、技术背景、Current Phase；产品方向未明确时标注「等待确认」。
+5. 创建 ACTIVE.md / DECISIONS.md / CHANGELOG.md 骨架（标准见 `contracts/specs/`）。
+6. 初始化 Product Agent 工作空间：派发「初始化工作空间」任务，轻验收后分配需求分析任务。
+7. 需求分析：Product Agent 产出 PRD，PM 审核（完整清晰 → APPROVED 落库 requirements/；不完整 → 返回补充）。
+8. 产品形态规划：PM 基于 PRD 决定 MVP 形态、演进路径、长期边界；不确定时询问用户，不自行假设。产出记录到 PROJECT.md 与 DECISIONS.md。
+9. 完善 PROJECT.md：回填「等待确认」字段。
+10. 按需初始化其他 Agent 工作空间：每个 Agent 第一个业务 Task 前先派发「初始化工作空间」任务并轻验收；开发类另确认架构决策与工程骨架。
+11. 完成标志：四个核心文件有效、无「等待确认」、PRD APPROVED、参与业务的 Agent 工作空间验收通过。初始化完成前不得创建业务 Feature / Task。
 
 ---
 
@@ -105,3 +106,13 @@ PM 维护 PROJECT.md / ACTIVE.md / DECISIONS.md / CHANGELOG.md：
 - PRD 不完整：返回 Product Agent 补充。
 - Agent 无法完成任务：分析原因 → 调整 Task → 重新分配。
 - 发现系统性问题：记录 → 创建 Decision → 调整后续计划。
+
+---
+
+# 9. Git 使用流程
+
+项目级 git 由 PM 维护，只保留 main 分支：
+
+- 初始化项目时在项目根目录执行 git init；项目级 git 不跟踪 `protocols/` 与 `Agents/`，协议文档与各 Agent 工作空间由各自 git 独立管理。
+- 完成一个 Feature（相关 Task 均验收通过）后执行 git commit，记录 Feature 完成。
+- 用户验收通过后，推送项目远程仓库；若尚未创建远程仓库，提示用户创建；同时通知其他 Agent 推送各自远程仓库。

@@ -1,6 +1,6 @@
 # Agent Workflow
 
-**版本：** 1.0
+**版本：** 1.1
 
 **定位：** 所有 Agent 的通用协作流程。各 Agent 只保留领域差异（见 `contracts/agents/`）。
 
@@ -108,6 +108,10 @@ Deliverable 包含：结果、状态、验证信息、必要说明（最小格�
 ---
 
 # 9. 分支与提交协议（开发类 Agent）
+
+## 适用范围
+
+本协议仅适用于开发类 Agent（Frontend / Backend / Mobile）。其他 Agent（Product / UI / QA）的工作空间 git 只保留 main 分支，不创建 dev / feature 等分支。
 
 ## 长期分支
 
