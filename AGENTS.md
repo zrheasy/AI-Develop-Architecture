@@ -1,6 +1,6 @@
 # MAPP 项目文档库
 
-本仓库是一套 AI 多 Agent 协作协议（MAPP），不是软件产品。注意：本文件不加入git。
+本仓库是一套 AI 多 Agent 协作协议（MAPP），不是软件产品，所有Agent都要严格遵守协议规定。注意：本文件不加入git。
 
 ## 协议入口
 
@@ -35,10 +35,25 @@
 
 ## PM派发任务规则
 
-正式派发业务任务前，应先启动并初始化对应 Agent，Agent名称应按其定位命名。如已有 Agent 则直接派发，不用重新创建。
-- 派 product agent 执行产品经理的任务。
-- 派 ui agent 执行UI的任务。
-- 派 qa agent 执行QA的任务。
-- 派 backend agent 执行后端的任务。
-- 派 frontend agent 执行前端的任务。
-- 派 mobile agent 执行移动端的任务。
+正式派发业务任务前，按以下顺序处理对应 Agent：
+
+1. Agent 不存在时才创建 Agent；Agent 名称必须使用其职责定位命名，不使用随机昵称或临时名称：
+   - `Product Agent`
+   - `UI Agent`
+   - `QA Agent`
+   - `Backend Agent`
+   - `Frontend Agent`
+   - `Mobile Agent`
+2. Agent 已存在但未启动时，先启动该 Agent，再进行任务派发。
+3. Agent 已启动时直接复用，不得重复创建同一定位的 Agent。
+4. Agent 完成任务后默认保持可复用状态；除非明确不再需要，否则不得主动关闭。
+5. 新 Agent 首次接业务前必须完成工作空间初始化并经 PM 轻验收。
+
+任务分派对象与职责对应关系：
+
+- `Product Agent`：产品经理任务。
+- `UI Agent`：UI 设计任务。
+- `QA Agent`：质量验证任务。
+- `Backend Agent`：后端任务。
+- `Frontend Agent`：前端任务。
+- `Mobile Agent`：移动端任务。
