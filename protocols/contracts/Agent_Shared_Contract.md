@@ -41,7 +41,7 @@ PM 通知 Agent 时只发送完成任务所必需的信息：
 - 前置依赖是否满足。
 - 启动或完成后的下一状态。
 
-具体上下文信息（背景、约束、验收标准等）写入 TASK 文件，不在通知中重复展开。
+Task 已提供的信息不在通知中重复展开。
 
 ---
 
@@ -52,12 +52,10 @@ Agent 对 PM 的完成通知只包含：
 ```text
 Status: DONE / BLOCKED
 Deliverable: 实际文件地址
-Commit: commit hash（如适用）
-Verification: 测试摘要
 Blockers: 无 / 阻塞说明
 ```
 
-Task 已提供的信息不在通知中重复展开。
+Deliverable 已提供的信息不在通知中重复展开。
 
 ---
 

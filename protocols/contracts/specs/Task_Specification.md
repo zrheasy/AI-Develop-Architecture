@@ -57,6 +57,15 @@ Feature:
 Background:
 Constraints:
 
+## Risk Level
+L0 / L1 / L2 / L3
+
+## QA Required
+Yes / No
+
+## QA Decision Reason
+说明是否需要 QA，以及判断依据。
+
 ## Acceptance Criteria
 - ...
 
@@ -72,6 +81,14 @@ PASS / FAIL
 ```
 
 Deliverable 必须记录可直接访问的实际交付物地址，不得只写抽象类型（如「API 文档」）。
+
+## 轻量 Task 的验证要求
+
+当 Task 为 L0 且 QA Required 为 No 时，Owner Agent 必须完成与改动直接相关的最小自测；自测至少包含必要的单元测试、构建或浏览器检查之一；Deliverable 必须记录实际验证命令与结果；PM 只检查范围、交付完整性和验证证据；不得因为形式完整性自动创建 QA Task。
+
+## QA 验证范围控制
+
+QA Task 必须明确验证目标、不验证的范围、最大样本数或测试边界、必须输出的证据和阻塞时的汇报条件。QA 不得重复执行与验收目标无关的完整回归。
 
 ---
 

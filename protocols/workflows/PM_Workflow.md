@@ -52,6 +52,14 @@ Product Agent 输出 PRD（Feature Goal、User Value、Product Decision、Scope�
 | Feature Enhancement | 已有能力增强 | 关联已有 Feature，创建 Task |
 | Maintenance | 维护已有能力 | 直接创建 Task |
 
+## 轻量维护任务规则
+
+以下任务默认归类为轻量维护任务：单页面内的小范围 UI 样式调整；间距、尺寸、对齐、颜色、字体等视觉微调；不改变产品流程、API、数据结构和业务规则；不涉及跨 Agent 协作；不影响核心用户路径。
+
+轻量维护任务默认流程：`User Request → PM 创建 Task → Owner Agent 修改 → Owner Agent 自测 → PM 检查交付 → Task 完成`。
+
+轻量维护任务默认不创建 Product、UI 或 QA Task。需求改变用户价值、产品规则或用户流程，需要视觉方案或设计资产，涉及多个职责域、核心流程、API、安全或数据结构，Owner Agent 自测失败或用户明确要求额外验收时，PM 才增加其他 Agent。
+
 ---
 
 # 5. Feature 管理
@@ -78,6 +86,19 @@ Product Agent 输出 PRD（Feature Goal、User Value、Product Decision、Scope�
 - 失败：TASK 记录 FAIL 与 Failure Reason，索引保留「审核中」，通知 Agent 重新执行。
 - PM 只验证需求符合性（PRD）、Task 符合性、Feature 影响与后续动作；不重复实现 Agent 工作，不把专业实现细节复制到治理文档。
 - 开发类 Task 无 commit hash / 分支 / 合并目标时不得通过验收。
+
+## QA 派发决策
+
+QA 不是所有 Task 的默认后置步骤，PM 根据风险等级决定是否派发：
+
+| 级别 | 适用范围 | 默认流程 |
+|---|---|---|
+| L0 | 单页面、纯样式、无业务逻辑变化 | Owner Agent 自测 → PM 验收 |
+| L1 | 单页面交互或局部组件行为变化 | Owner Agent 自测 → PM 验收；必要时抽查 |
+| L2 | 跨页面、核心流程或多模块变化 | Owner Agent 自测 → QA 精简回归 |
+| L3 | Backend、真实 LLM、安全、数据、发布相关 | Owner Agent 自测 → QA 完整验收 |
+
+PM 必须在 Task 中记录 QA 是否需要以及判断理由。
 
 ---
 
@@ -119,7 +140,7 @@ PM 维护 PROJECT.md / ACTIVE.md / DECISIONS.md / CHANGELOG.md：
 
 # 10. PM派发任务规则
 
-正式派发业务任务前，按以下顺序处理对应 Agent：
+正式派发业务任务前，PM 必须先检查对应 Agent 的工作空间、启动状态和 `ACTIVE.md`，再按以下顺序处理：
 
 1. Agent 不存在时才创建 Agent；Agent 名称必须使用其职责定位命名，不使用随机昵称或临时名称：
    - `Product Agent`
@@ -132,6 +153,8 @@ PM 维护 PROJECT.md / ACTIVE.md / DECISIONS.md / CHANGELOG.md：
 3. Agent 已启动时直接复用，不得重复创建同一定位的 Agent。
 4. Agent 完成任务后默认保持可复用状态；除非明确不再需要，否则不得主动关闭。
 5. 新 Agent 首次接业务前必须完成工作空间初始化并经 PM 轻验收。
+6. Agent 状态不明确时，先完成状态核查，不得通过重复创建同职责 Agent 规避确认。
+7. 后续同职责任务优先复用已初始化且可用的 Agent。
 
 任务分派对象与职责对应关系：
 
