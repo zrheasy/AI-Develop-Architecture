@@ -22,7 +22,7 @@
 Planning / Implementation / Review。
 
 ## Task Status
-执行中 / 审核中。
+执行中 / 审核中 / 阻塞中。
 
 ## Active Work
 当前进行中的工作。
@@ -52,7 +52,8 @@ Feature / Task / Decision 引用。
 
 - 目标、阶段、下一步、阻塞变化时更新。
 - 任务完成：Task Status 更新为「审核中」，填写 Deliverables，通知 PM。
-- 审核失败：重新执行当前任务，Task Status 更新为「执行中」。
+- 审核失败：PM 将 Task 改为「执行中」后，重新执行当前任务。
+- 任务阻塞：Task Status 更新为「阻塞中」，填写 Blockers，通知 PM；阻塞解除后由 PM 改回「执行中」。
 - 审核通过：Next Action 更新为读取下一个「执行中」任务。
 - 保持简短、当前、可执行。
 

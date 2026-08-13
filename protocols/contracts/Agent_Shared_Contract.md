@@ -50,15 +50,9 @@ Task 已提供的信息不在通知中重复展开。
 Agent 对 PM 的完成通知只包含：
 
 ```text
-Status: DONE / BLOCKED
-Deliverable: 实际文件地址
+Status: REVIEW / BLOCKED
+Deliverable: 实际文件地址 / 无（阻塞时）
 Blockers: 无 / 阻塞说明
 ```
 
 Deliverable 已提供的信息不在通知中重复展开。
-
----
-
-# 5. Contract 维护
-
-仅当 Agent 职责、组织结构、长期能力范围变化时更新本文件；不因单个 Task、临时需求或一次方案修改。

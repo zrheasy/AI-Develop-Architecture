@@ -1,164 +1,243 @@
 # Agent Workflow
 
-**版本：** 1.1
+**版本：** 2.0
 
-**定位：** 所有 Agent 的通用协作流程。各 Agent 只保留领域差异（见 `contracts/agents/`）。
+**定位：** 所有非 PM Agent 的统一任务执行流程。Product、UI、Frontend、Backend、Mobile、QA 只在各自 contract 中补充领域门禁，不重复定义本流程。
 
-继承：`BASIC_MAPP.md`。
+继承：`BASIC_MAPP.md`。角色职责、领域输入、专业验证和交付差异以 `contracts/agents/{Agent}.md` 为准；Task 字段和状态以 `contracts/specs/Task_Specification.md` 为准。
 
----
+## 1. 工作空间边界
 
-# 1. 工作空间结构
-
-Agent 工作空间位于 `Agents/{Agent}/`，只包含上下文文件与工程资产，不包含协议文件：
+每个 Agent 只在自身工作空间工作：
 
 ```text
-{Agent} Workspace
-├── PROJECT.md      # 领域版项目上下文（派生自根目录，只保留本领域相关内容）
-├── DECISIONS.md    # 领域长期决策入口
-├── ACTIVE.md       # 当前工作状态（Agent 独占维护）
-├── workspace/      # 长期工程资产（git 管理）
-└── deliverables/   # 任务完成时提交 PM 的证明
+Agents/{Agent}/
+├── PROJECT.md       # 本领域项目上下文
+├── ACTIVE.md        # 当前唯一运行状态
+├── DECISIONS.md     # 本领域长期决策入口
+├── workspace/       # 长期工程资产；开发类 Agent 的源代码在此
+└── deliverables/    # 提交 PM 的结果证明，不复制开发源代码
 ```
 
-协议文件统一存放于 `protocols/`，Agent 只读引用，不复制、不修改。
+协议文件位于 `protocols/`，只读引用，不复制、不修改。Agent 不得修改：
 
-## deliverables/
+- PM 治理域：`PROJECT.md`、根目录 `ACTIVE.md`、`DECISIONS.md`、`CHANGELOG.md`、`requirements/`、`features/`、`tasks/`、`decisions/`；
+- 其他 Agent 的工作空间；
+- 未被当前 Task 授权的代码、配置或长期决策。
 
-- 工程类 Agent（Frontend / Backend / Mobile）禁止提交源代码，代码保留在 workspace/。
-- 各 Agent 具体交付内容见 `contracts/agents/` 对应文档。
-- 不是长期资产目录：验收后长期价值沉淀到 workspace/、Feature 或 Decision，交付物可归档或删除。
+跨域需求、输入变化或需要其他 Agent 支持时，暂停并反馈 PM，由 PM 调整或重新创建 Task。
 
-## 工作空间初始化
+## 2. 初始化工作空间
 
-Agent 收到 PM「初始化工作空间」任务后自动完成：派生领域 PROJECT.md、创建 ACTIVE.md / DECISIONS.md 骨架、创建 workspace/ 与 deliverables/、workspace/ 执行 git init + .gitignore + 初始提交。
+首次收到「初始化工作空间」Task 时，按以下顺序执行：
 
-开发类 Agent（Frontend / Backend / Mobile）附加：依据自身领域规范完成架构设计与技术选型，产出架构决策写入 DECISIONS.md，创建工程骨架；跨领域影响升级 PM 确认。
+1. 读取 BASIC、共享契约、本 Agent contract 和本流程；
+2. 创建领域版 `PROJECT.md`、`ACTIVE.md`、`DECISIONS.md` 骨架；
+3. 创建 `workspace/` 与 `deliverables/`；
+4. 开发类 Agent 在 `workspace/` 初始化独立 git、`.gitignore`、`main` / `dev` 基线和工程骨架；Product / UI / QA 工作空间只保留 `main`；
+5. 按领域 contract 完成初始化所需的产品、设计、质量或工程准备；
+6. 检查目录、文件、权限和初始状态；
+7. 更新 `ACTIVE.md` 为「审核中」，附初始化交付物地址，通知 PM 轻验收。
 
-完成后更新 ACTIVE.md 为「审核中」并通知 PM 轻验收。验收通过前不接受正式业务任务。
+初始化未通过 PM 验收前：
 
----
+- 不接受正式业务 Task；
+- 不读取或执行下一个 Task；
+- 不自行宣告工作空间可用。
 
-# 2. 工作启动协议
+## 3. 任务启动门禁
 
-收到 Task 后按顺序：
+收到正式 Task 后，Agent 必须按以下最小顺序恢复上下文：
 
-1. 读取 `contracts/agents/{Agent}.md`：确认身份、职责、权限。
-2. 读取本文件：确认工作流程。
-3. 读取同一份 Agent 文档的领域规范：确认能力与约束。
-4. 读取 PROJECT.md：理解项目目标与边界。
-5. 读取 ACTIVE.md：理解当前状态与阻塞。
-6. 通过 ACTIVE.md 固定指针读取 `tasks/{Agent}/INDEX.md`，只读「执行中」（按优先级取一个）或「审核中」（重新执行当前任务）。
-7. 按需读取 DECISIONS.md（仅任务涉及领域长期决策时）。
+1. 读取 `BASIC_MAPP.md`，确认最小工作协议；
+2. 读取自身 `contracts/agents/{Agent}.md`，确认职责和领域门禁；
+3. 读取 `contracts/Agent_Shared_Contract.md`，确认权限和输出格式；
+4. 读取本文件，确认当前执行路径；
+5. 读取领域版 `PROJECT.md`，确认项目目标和边界；
+6. 读取自身 `ACTIVE.md`，确认真实状态、阻塞、下一步和 Task Index 指针；
+7. 根据指针读取 `tasks/{Agent}/INDEX.md`：只选择其中优先级最高的一个「执行中」任务；返工只处理 PM 已改回「执行中」的当前任务；
+8. 读取该 Task 的 `Goal`、`Context`、`Inputs`、`Constraints`、`Acceptance Criteria`、`Deliverable` 和相关 Failure Reason；
+9. 仅在当前 Task 涉及时读取 `DECISIONS.md`、PRD、Feature、UI / API Contract 或其他参考资料。
 
----
+以下情况不得开始执行：
 
-# 3. 上下文获取
+- INDEX 中任务为「等待中」「阻塞中」或「已完成」；
+- 不是当前 Agent 的 Owner；
+- 已有另一个 Task 处于执行中或审核中；
+- Task 缺少目标、输入、约束、验收标准或交付要求；
+- 前置依赖未满足，或 ACTIVE.md 的阻塞尚未解除；
+- 当前 Task 与职责、长期决策或工作空间边界冲突。
 
-只获取完成当前 Task 所需信息。禁止：无目的浏览项目、一次读取大量无关文档、主动建立完整项目知识库。
+发现问题时，立即向 PM 输出缺失项、影响和需要的处理，不自行猜测或顺手修正治理文件。
 
----
+## 4. 单任务执行循环
 
-# 4. Task 执行
+每次只执行一个 Task，按以下循环推进：
 
-- 明确 Goal / Input / Expected Output / Acceptance Criteria，缺少关键条件则停止并反馈。
-- 最小修改：不扩大需求、不无关优化、不主动重构、不修改无关内容。
-- 优先复用：已有规范、流程、交互、接口模式；避免重复建设与不必要复杂度。
+```text
+确认目标
+  → 获取最小上下文
+  → 形成任务内方案
+  → 执行最小修改
+  → 验证验收标准
+  → 生成 Deliverable
+  → 提交审核
+```
 
----
+执行约束：
 
-# 5. 验证
+- 先确认 Goal、Acceptance Criteria 和 Out of Scope，再开始修改；
+- 优先复用已有代码、设计、接口、测试和工程模式；
+- 只修改完成当前 Task 所必需的内容，不主动重构、优化或处理无关问题；
+- 领域 contract 允许的内部实现由 Agent 自主决定；跨域或长期影响决策必须升级；
+- 不把临时方案、未确认候选或未验证结果当作完成输出。
 
-确认：Deliverable 完整、满足项目规范与验收标准、领域一致、可被下一 Agent 继续使用。领域验证方式见各 Agent 文档。
+## 5. 上下文恢复点
 
-## 验证时长与进度规则
+Agent 不依赖长期记忆维持协议合规。出现以下任一情况时，必须重新读取当前 Task 和 `ACTIVE.md`，必要时重新读取相关 contract：
 
-Agent 执行验证时应优先完成最小必要验证，不进行与 Task 无关的扩展测试。当验证任务预计较长时，先完成快速检查并汇报阶段性结果，再执行剩余高价值验证；如遇环境阻塞，立即返回已完成验证、当前阻塞、未完成验证以及是否需要 PM 决策。Agent 不得在没有阶段性反馈的情况下长时间等待。
+- 开始执行前；
+- 上下文压缩、会话恢复或长时间中断后；
+- 完成一段较长实现或验证后；
+- 任务范围、依赖、阻塞或下一步发生变化时；
+- 提交审核前。
 
-QA Agent 还必须优先使用已有自动化测试，不重复 Owner Agent 已提供且与验收目标一致的证据，验证范围不得超出 Task，发现无阻断问题后应尽快提交结论。
+恢复时只确认五项：`Task`、`Goal`、`当前状态`、`下一步`、`禁止事项`。如果当前工作与其中任一项不一致，先暂停并反馈 PM。
 
----
+## 6. 验证门禁
 
-# 6. Deliverable 与提交
+Agent 必须按 Task 的 Risk Level、Acceptance Criteria 和自身 contract 完成最小有效验证：
 
-Deliverable 包含：结果、状态、验证信息、必要说明（最小格式见 `contracts/Agent_Shared_Contract.md` 最小输出）。
+1. 先完成快速检查，确认结果不是明显错误；
+2. 再执行验收标准要求的高价值验证；
+3. 优先复用已有自动化测试和有效证据，不重复无价值的测试；
+4. 只验证当前 Task 范围，不扩展为无关的完整回归、性能测试或安全审计；
+5. 记录实际命令、环境、版本、输入 / 设备和结果。
 
-完成流程：
+验证必须证明：
 
-1. 更新 ACTIVE.md：任务状态「审核中」（REVIEW），附 Deliverable 地址。
-2. 通知 PM 审核。
-3. 等待审核结果，不读取下一个任务。
-4. 审核失败：查看 TASK 失败原因，重新执行并更新 ACTIVE.md，不跳任务。
+- 结果覆盖 Acceptance Criteria；
+- 领域约束和项目边界未被破坏；
+- Deliverable 可访问且内容足以让下一 Agent 继续工作；
+- 已知限制、残余风险和未完成项均已明确。
 
-禁止输出：未确认或未验证的方案、临时想法、无关讨论记录。
+当验证预计较长时，先报告快速检查结果和当前阻塞，再继续高价值验证；不得在没有阶段性反馈的情况下长时间等待。
 
----
+环境阻塞时，立即报告：已完成验证、未完成范围、阻塞原因、对结论的影响和需要 PM 决定的事项。环境问题不能被包装成 PASS。
 
-# 7. 状态同步
+## 7. 交付与提交审核
 
-- ACTIVE.md：Agent 独占维护，更新任务状态、真实状态、下一步、阻塞、Deliverable 地址（审核中时）。
-- Task 状态：由 PM 在 INDEX.md 维护，Agent 不修改索引与 TASK 文件。
-- DECISIONS.md：仅产生长期有效决策时记录（决策 / 原因 / 影响）。
-- 禁止把 ACTIVE.md 变成过程日志、Todo 列表或历史记录。
+提交审核前必须完成：
 
----
+1. 生成实际 Deliverable，记录结果、范围、状态、验证信息、限制和后续说明；
+2. 开发类 Task 记录 Commit hash、Branch、Merge Target、Verification；
+3. 非开发类 Task 按领域 contract 记录对应交付证明；
+4. 确认没有修改 `INDEX.md`、Task 文件或其他 Agent 工作空间；
+5. 更新自身 `ACTIVE.md`：`Task Status: 审核中`，附 Deliverable 地址，填写真实下一步和阻塞；
+6. 按共享契约通知 PM：
 
-# 8. 协作与异常
+```text
+Status: REVIEW
+Deliverable: 实际文件地址
+Blockers: 无 / 阻塞说明
+```
 
-- 默认不直接协调其他 Agent，所有跨 Agent 协作经 PM。
-- 发现需求变化、Task 边界变化、需要其他领域支持、修改影响其他模块：暂停扩展 → 反馈 PM → 重新分配 Task。
-- 信息不足：明确缺失信息，请求补充。
-- 与已有决策冲突：停止修改 → 检查 DECISIONS.md → 提交决策更新请求。
-- 发现领域问题：记录 → 通知 PM → 等待决策。
+提交后必须等待 PM 审核，不读取、不执行下一个 Task，不把“已提交”称为“已完成”。
 
----
+## 8. 审核失败与返工
 
-# 9. 分支与提交协议（开发类 Agent）
+PM 退回时：
 
-## 适用范围
+1. 读取 Task 中的 `Failure Reason`；
+2. 确认返工范围和新的验收条件；
+3. 等待 PM 将 `INDEX.md` 改为「执行中」，再将自身 `ACTIVE.md` 改为「执行中」并写明返工目标；
+4. 只修复 Failure Reason 指定的问题；
+5. 重新执行必要验证并更新 Deliverable；
+6. 再次将 `ACTIVE.md` 改为「审核中」并提交 PM。
 
-本协议仅适用于开发类 Agent（Frontend / Backend / Mobile）。其他 Agent（Product / UI / QA）的工作空间 git 只保留 main 分支，不创建 dev / feature 等分支。
+PM 维护的 `INDEX.md` 和 Task 状态由 PM 负责，Agent 不修改、不跳过、不关闭失败任务。返工中发现新的需求或跨域问题时，暂停并反馈 PM，不顺手扩大范围。
 
-## 长期分支
+## 9. 阻塞处理
 
-- `main`：已上线或可发布代码，只允许通过 `dev` 合并进入。
-- `dev`：当前开发集成分支，包含已完成但尚未上线的 Feature。
-- 禁止直接在 main / dev 上开发功能。
+无法继续时，Agent 将自身 `ACTIVE.md` 改为「阻塞中」，填写阻塞原因、影响、已完成项、未完成项和所需处理，并通知 PM。PM 将 `INDEX.md` 改为「阻塞中」；阻塞解除后改为「执行中」并通知 Agent。阻塞期间不得继续实现、提交审核或读取下一个 Task。
 
-## Feature 分支生命周期
+## 10. 状态同步规则
+
+Agent 只维护自身 `ACTIVE.md` 和在自身工作空间内产生的长期领域资产：
+
+- `ACTIVE.md` 只记录当前 Goal、阶段、Task Status、Active Work、Next Action、Blockers、Deliverables、Task Index 和更新时间；
+- 状态变化、阻塞变化、下一步变化或交付提交时更新 `ACTIVE.md`；
+- 不记录工作日志、完整 Todo、讨论过程、已完成历史或技术细节；
+- 产生未来仍影响领域工作的稳定决策时，记录到自身 `DECISIONS.md`，并将跨领域决策升级 PM；
+- 长期设计、产品、测试或工程资产沉淀到 `workspace/`，不要把交付物当作长期知识库。
+
+## 11. 协作与异常
+
+默认不直接指挥其他 Agent，跨 Agent 协作通过 PM 完成。出现以下情况必须暂停：
+
+- 需求、验收标准或输入不明确；
+- Task 超出职责、范围或工作空间权限；
+- 需要修改其他 Agent、项目治理域或源代码之外的文件；
+- 与已有决策、接口、设计或产品规则冲突；
+- 发现安全、数据完整性、核心流程或严重质量风险；
+- 验证环境不可用，无法形成可信结论。
+
+异常反馈必须包含：已确认事实、已完成工作、阻塞原因、影响范围、未完成项和需要 PM / 用户决定的事项。禁止用临时规则、隐式假设或直接改别人的文件绕过阻塞。
+
+## 12. 开发类 Agent 的分支与提交
+
+适用：Frontend、Backend、Mobile。
+
+### 分支基线
+
+- `main`：已上线或可发布代码；
+- `dev`：当前开发集成分支；
+- 禁止直接在 `main` 或 `dev` 上开发功能。
+
+### Task 分支
 
 ```text
 dev → feature/<feature-slug> → dev → main
 ```
 
-1. 从最新 dev 创建 `feature/<feature-slug>`。
-2. 在 Feature 分支执行所属 Task，每项 Task 至少一个 commit。
-3. Feature 完成并通过自检后合并回 dev（合并前先同步最新 dev）。
-4. QA 验收通过、工作区干净、发布记录准备完成后，将 dev 合并到 main。
+- 新 Feature 从最新 `dev` 创建 `feature/<feature-slug>`；
+- Bug / 维护使用 `fix/<task-id>`；紧急问题使用 `hotfix/<issue-id>`，完成后同时合并到 `main` 与 `dev`；
+- 每项 Task 至少一个 commit，commit 只包含当前 Task，使用 Conventional Commit；
+- Feature 合并 `dev` 前由开发 Agent 完成自检并同步最新 `dev`；
+- QA 验收通过、工作区干净、发布记录准备完成后，才允许 `dev` 合并到 `main`；
+- 分支创建、commit、合并和冲突处理由开发 Agent 负责，PM 只检查结果和发布许可。
 
-分支命名：`feature/<feature-slug>`、`fix/<task-id>`、`hotfix/<issue-id>`（完成后必须同时合并到 main 与 dev）。
+### 既有 workspace
 
-## Commit 与合并
+若开发 workspace 缺少 `main` / `dev`：
 
-- 每项 Task 前必须提交 commit，并在 Deliverable 与 ACTIVE.md 记录 commit hash、分支名、合并目标分支、测试摘要。
-- Commit 只包含当前 Task 改动，使用 Conventional Commit。
-- 分支创建、commit、合并与冲突处理由对应开发 Agent 负责；PM 只确认分支状态、Task 依赖、QA 结果与发布许可，不直接修改或合并代码。
+1. 保留现有代码和历史；
+2. 确认 `main` 基线；
+3. 从 `main` 创建 `dev`；
+4. 完成迁移并验证后，才开始下一项开发 Task。
 
-## 既有 workspace 迁移
+## 13. 非开发类 Agent 的分支
 
-已存在 workspace 缺少 main / dev 时，开始下一项开发 Task 前由对应开发 Agent 迁移：保留现有代码与历史、确定 main 基线、从 main 创建 dev。
+适用：Product、UI、QA。
 
----
+- 工作空间 git 只保留 `main`；
+- 不创建 `dev`、Feature 分支或临时开发分支；
+- 领域资产和交付物在自身 workspace 内维护；
+- 交付内容以对应 Agent contract 为准。
 
-# 10. 自检清单
+## 14. 完成检查
 
-每次 Task 完成前确认：
+每次提交审核前确认：
 
-- 身份：按 Agent 文档定义的角色工作。
-- 最小上下文：只读取了完成任务所需信息。
-- 目标理解：理解 Task 目标与验收标准。
-- 最小修改：避免无必要扩大范围。
-- 输出交付：产生明确 Deliverable，ACTIVE.md 更新为「审核中」并附地址。
-- 串行执行：一次只执行一个任务，等待审核期间不读取下一个。
-- 状态同步：只更新 ACTIVE.md，未修改 INDEX.md 与 TASK 文件。
-- 可继续工作：其他 Agent 可基于我的结果继续。
+```text
+[ ] 身份、职责和执行域正确
+[ ] 当前 Task 是唯一正在执行的任务
+[ ] Goal、Inputs、Constraints、Acceptance Criteria 已理解
+[ ] 只读取和修改了最小必要范围
+[ ] 未越权、未扩大范围、未跳过依赖
+[ ] 结果与验证证据真实可复核
+[ ] Deliverable 已生成且可被后续工作继续使用
+[ ] ACTIVE.md 已更新为「审核中」并附地址
+[ ] 未修改 INDEX.md 或 Task 文件
+[ ] 已通知 PM，并等待审核
+```

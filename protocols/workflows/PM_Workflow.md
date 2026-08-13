@@ -1,166 +1,238 @@
 # PM Workflow
 
-**版本：** 2.1
+**版本：** 3.0
 
-**定位：** PM Agent 的项目协调执行协议，只保留 PM 特有的动作；Agent 通用流程见 `workflows/Agent_Workflow.md`。
+**定位：** PM 的项目协调执行流程。PM 负责把用户请求转化为可执行 Task、协调 Agent、验收交付并收口项目状态；不代替专业 Agent 实现。
 
-继承：`BASIC_MAPP.md`。
+继承：`BASIC_MAPP.md`。PM 的稳定职责、权限和不可违反的门禁见 `contracts/agents/PM.md`；对象字段和格式以 `contracts/specs/` 为准。
 
----
+## 1. 唯一主流程
 
-# 1. 工作原则
+PM 收到用户请求后，必须按以下顺序推进：
 
-- PM 是项目唯一协调入口，所有用户需求经 PM 进入。
-- 其他 Agent 不直接接受用户需求、不自行创建 Feature、不调整项目目标。
-- PM 管理目标与验收，不管理实现；不替代产品、技术、设计、质量决策。
+```text
+初始化检查
+  → 需求分类
+  → 产品判断
+  → Feature 管理
+  → Task 设计
+  → Agent 就绪检查
+  → Task 派发
+  → 交付审核
+  → 状态收口
+```
 
----
+任何 Gate 未通过，PM 必须停在当前 Gate，记录阻塞和下一步，不得跳过、假设或直接实现。
 
-# 2. 项目启动协议
+## 2. Gate 0：初始化检查
 
-适用：新项目，或项目级核心文件缺失（PROJECT.md / ACTIVE.md / DECISIONS.md / CHANGELOG.md）。
+### 已初始化条件
 
-1. 判断初始化状态：四个核心文件存在且有效、PROJECT.md 无「等待确认」、相关 Agent 工作空间已初始化。未初始化先执行本协议，已初始化直接进入需求接收。
-2. 在项目根目录执行 git init（已初始化跳过），项目 git 只保留 main 分支。
-3. 建立目录骨架：README、PROJECT.md、ACTIVE.md、DECISIONS.md、CHANGELOG.md、requirements/、features/、tasks/{Agent}/、decisions/、Agents/{Agent}/。
-4. 创建 PROJECT.md：目标、边界、长期原则、技术背景、Current Phase；产品方向未明确时标注「等待确认」。
-5. 创建 ACTIVE.md / DECISIONS.md / CHANGELOG.md 骨架（标准见 `contracts/specs/`）。
-6. 初始化 Product Agent 工作空间：派发「初始化工作空间」任务，轻验收后分配需求分析任务。
-7. 需求分析：Product Agent 产出 PRD，PM 审核（完整清晰 → APPROVED 落库 requirements/；不完整 → 返回补充）。
-8. 产品形态规划：PM 基于 PRD 决定 MVP 形态、演进路径、长期边界；不确定时询问用户，不自行假设。产出记录到 PROJECT.md 与 DECISIONS.md。
-9. 完善 PROJECT.md：回填「等待确认」字段。
-10. 按需初始化其他 Agent 工作空间：每个 Agent 第一个业务 Task 前先派发「初始化工作空间」任务并轻验收；开发类另确认架构决策与工程骨架。
-11. 完成标志：四个核心文件有效、无「等待确认」、PRD APPROVED、参与业务的 Agent 工作空间验收通过。初始化完成前不得创建业务 Feature / Task。
+以下条件全部满足，才可进入需求接收：
 
----
+- `PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`、`CHANGELOG.md` 存在且内容有效；
+- `PROJECT.md` 的目标、边界和产品形态已明确，不存在「等待确认」；
+- 根目录的项目骨架和 `tasks/{Agent}/` 已建立；
+- 本次任务涉及的 Agent 工作空间已初始化并通过轻验收。
 
-# 3. 需求接收
+### 未初始化处理
 
-收到用户需求后不立即创建 Task，先判断初始化状态，再判断是否需要产品分析：
+按以下顺序执行，未完成前不得创建业务 Feature 或业务 Task：
 
-涉及用户价值变化、新产品能力、用户流程变化、产品规则变化 → 交由 Product Agent 分析。
+1. 在项目根目录初始化 git（已存在则跳过），并确保项目级仓库使用 `main` 作为唯一长期分支；
+2. 建立 `README`、四个核心文件、`requirements/`、`features/`、`tasks/{Agent}/` 和 `decisions/` 骨架；Agent 工作空间由对应 Agent 通过初始化 Task 创建；
+3. 创建 `PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`、`CHANGELOG.md` 骨架；
+4. 初始化 Product Agent 工作空间并轻验收；
+5. 派发需求分析 Task，获得 DRAFT PRD；
+6. 审核 PRD：完整且方向明确 → 保存为 `requirements/PR-XXX.md` 并标记 `APPROVED`；否则退回补充；
+7. 基于 APPROVED PRD 明确 MVP 形态、演进路径和长期边界，记录到 `PROJECT.md` / `DECISIONS.md`；
+8. 按需初始化其他参与 Agent；
+9. 复核四个核心文件、PRD、Agent 工作空间和「等待确认」项，确认初始化完成。
 
-Product Agent 输出 PRD（Feature Goal、User Value、Product Decision、Scope、Affected Areas、Out of Scope）→ PM 处理。
+初始化期间只有初始化 Task、需求分析 Task 和轻验收可以执行。
 
----
+## 3. Gate 1：需求分类
 
-# 4. 需求分类
+先判断用户请求是否改变用户价值、用户流程、产品规则或用户可感知能力：
 
-| 类型 | 定义 | 处理 |
+| 类型 | 处理 |
+|---|---|
+| 新增或改变用户可感知能力、用户价值、用户流程或产品规则 | 先派 Product Agent，等待 APPROVED PRD；再创建或更新 Feature |
+| Bug、技术优化或一次性维护 | 直接创建 Task |
+| 目标或边界不清 | 暂停，交 Product Agent 分析或请求用户确认 |
+
+轻量维护只有在同时满足以下条件时才可走简化流程：单页面、纯样式、无业务逻辑 / API / 数据结构 / 产品规则变化，不涉及跨 Agent，不影响核心路径。流程为：`创建 Task → Owner 自测 → PM 验收`。
+
+## 4. Gate 2：产品判断与 PRD
+
+需要产品分析时：
+
+1. PM 创建 Product Agent Task，提供最小必要背景和决策问题；
+2. Product Agent 只提交 `DRAFT` PRD，包含 `User Need`、`Goal`、`Solution`、`Scope`、`Feature Impact`、`Affected Areas` 和产品 `Acceptance Criteria`；
+3. PM 检查用户价值、范围、排除项、Feature 影响、职责领域和验收标准；
+4. 通过则将 PRD 保存到 `requirements/PR-XXX.md` 并改为 `APPROVED`；不通过则写明 Failure Reason，退回原任务；
+5. 未 APPROVED 的 PRD 不得创建业务 Feature 或执行业务拆解。
+
+PRD 只回答为什么做、做什么、影响什么；不得把 API、数据库、代码方案或 Task 执行状态写入 PRD。
+
+## 5. Gate 3：Feature 管理
+
+当请求形成可长期管理的用户能力时，PM 创建或更新 Feature：
+
+- 新能力：创建 `features/<name>.md`，初始状态为 `PLANNING`；
+- 已有能力增强：更新已有 Feature 的 Scope、User Value、Evolution 或 Related Tasks；
+- 技术优化、Bug、一次性工作：不创建 Feature；
+- Feature 只描述长期能力、用户价值、范围、生命周期和演进方向，不记录实现细节、Task 日志或 Bug 明细。
+
+Feature 的状态沿 `PLANNING → ACTIVE → STABLE → DEPRECATED → ARCHIVED` 管理。相关格式以 `Feature_Specification.md` 为准。
+
+## 6. Gate 4：Task 设计与登记
+
+PM 根据已批准的 PRD / Feature / 维护请求拆解 Task。每个 Task 必须满足：
+
+- 有唯一 ID、Title、Owner、Goal、Context、Inputs、Constraints；
+- 有可检查的 Acceptance Criteria；
+- 明确 Risk Level、QA Required 及判断理由；
+- 明确 Deliverable 地址或交付物要求；
+- 依赖、权限、环境和前置交付已确认；
+- 不包含未确认的产品、技术或范围决策。
+
+执行顺序：
+
+1. 按 Agent 职责拆分，保持一个 Task 一个主要 Owner；
+2. 将 Task 写入 `tasks/{Agent}/TASK-XXX.md`；
+3. 在对应 `INDEX.md` 登记为「等待中」；
+4. 只有前置输入全部满足时，才可进入「执行中」。
+
+Task 不规定实现方式，只规定目标、输入、约束、验收和交付证明。详细模板以 `Task_Specification.md` 为准。
+
+## 7. Gate 5：Agent 就绪与派发
+
+正式派发业务 Task 前，PM 必须检查 Owner Agent：
+
+1. Agent 是否为职责对应的固定角色：Product、UI、Frontend、Backend、Mobile 或 QA；
+2. 工作空间是否存在；
+3. Agent 是否已启动且可复用；
+4. `ACTIVE.md` 是否状态真实、没有未处理的审核或阻塞；
+5. 首次业务任务是否已完成工作空间初始化并通过轻验收；
+6. 是否存在同一 Agent 的执行中任务；若存在，不得并行派发第二个任务。
+
+Agent 不存在时才创建；已存在时复用，不通过重复创建同职责 Agent 规避状态确认。分配边界以 `workflows/Agent_Directory.md` 和对应 Agent contract 为准。
+
+派发通知只包含：Task 地址、Owner、前置依赖是否满足、启动后的状态和下一步。Task 已写明的信息不重复发送。
+
+## 8. Gate 6：执行监控与异常
+
+Task 状态由 PM 在 `INDEX.md` 维护，允许路径为：
+
+```text
+等待中 → 执行中 → 审核中 → 已完成
+             ↘ 阻塞中 ↗
+
+审核失败：审核中 → 执行中
+```
+
+执行期间：
+
+- Agent 一次只执行一个 Task；PM 不在审核期间派发其下一个 Task；
+- Agent 只维护自身 `ACTIVE.md`，不修改 `INDEX.md` 或 Task 文件；
+- PM 关注输入是否满足、范围是否变化、阻塞是否真实，不介入专业实现过程；
+- 发现需求变化、跨域修改、决策冲突或输入不足时，暂停当前推进，重新拆解或升级；
+- Agent 报告阻塞时，将对应 `INDEX.md` 改为「阻塞中」；解除后改为「执行中」并通知 Agent；
+- Agent 无法完成时，先判断是输入、环境、能力还是任务设计问题，再决定补充输入、调整 Task 或重新分配。
+
+## 9. Gate 7：交付审核
+
+Agent 提交审核的入口是：自身 `ACTIVE.md` 为「审核中」，并附实际 Deliverable 地址。PM 收到通知后：
+
+1. 将对应 `INDEX.md` 改为「审核中」；
+2. 检查交付物地址可访问、结果覆盖 Acceptance Criteria、验证证据真实可复核；
+3. 检查是否越权、扩大范围或引入未批准决策；
+4. 开发类 Task 额外检查 Commit hash、Branch、Merge Target、Verification；
+5. 根据 Risk Level 检查 QA 是否按 Task 要求完成，不以形式完整代替专业证据。
+
+### 审核通过
+
+- Task 文件记录 `Review Result: PASS`；
+- `INDEX.md` 改为「已完成」；
+- 若产生长期价值，沉淀到 Feature 或 Decision；
+- 通知 Agent 读取下一个「执行中」任务。
+
+### 审核失败
+
+- Task 文件记录 `Review Result: FAIL` 和具体 Failure Reason；
+- `INDEX.md` 改为「执行中」；
+- 通知原 Agent 依据 Failure Reason 返工；
+- Agent 将自身 `ACTIVE.md` 改为「执行中」，完成后再次提交「审核中」；
+- 不跳过当前任务、不直接关闭任务、不由 PM 代为修复。
+
+## 10. QA 派发决策
+
+PM 必须在 Task 中记录 QA 是否需要及理由：
+
+| Risk Level | 典型范围 | 默认流程 |
 |---|---|---|
-| New Feature | 新增用户可感知能力 | 创建 Feature，再拆 Task |
-| Feature Enhancement | 已有能力增强 | 关联已有 Feature，创建 Task |
-| Maintenance | 维护已有能力 | 直接创建 Task |
+| L0 | 单页面、纯样式、无业务逻辑变化 | Owner 自测 → PM 验收 |
+| L1 | 单页面交互或局部组件行为 | Owner 自测 → PM 验收；必要时抽查 |
+| L2 | 跨页面、核心流程或多模块变化 | Owner 自测 → QA 精简回归 |
+| L3 | Backend、真实 LLM、安全、数据、权限或发布相关 | Owner 自测 → QA 完整目标范围验收 |
 
-## 轻量维护任务规则
+QA Task 必须写明验证目标、排除范围、测试边界、证据要求和阻塞汇报条件。QA 不执行与验收目标无关的完整回归。
 
-以下任务默认归类为轻量维护任务：单页面内的小范围 UI 样式调整；间距、尺寸、对齐、颜色、字体等视觉微调；不改变产品流程、API、数据结构和业务规则；不涉及跨 Agent 协作；不影响核心用户路径。
+QA 结论是 PM 验收的输入：`QA Required: Yes` 的 Task 没有 QA `PASS`，PM 不得验收通过；QA `BLOCKED` 时 PM 只能保持任务阻塞或补齐前置条件，不得视为通过。
 
-轻量维护任务默认流程：`User Request → PM 创建 Task → Owner Agent 修改 → Owner Agent 自测 → PM 检查交付 → Task 完成`。
+## 11. Gate 8：状态收口
 
-轻量维护任务默认不创建 Product、UI 或 QA Task。需求改变用户价值、产品规则或用户流程，需要视觉方案或设计资产，涉及多个职责域、核心流程、API、安全或数据结构，Owner Agent 自测失败或用户明确要求额外验收时，PM 才增加其他 Agent。
+每次用户请求或 Feature 交付结束时，PM 必须确认：
 
----
+- `PROJECT.md` 只反映目标、方向、边界和长期原则；
+- 根目录 `ACTIVE.md` 反映真实当前阶段、阻塞和下一步；
+- `DECISIONS.md` 只记录已确认且未来仍有影响的决策；
+- Feature、PRD、Task 状态与实际交付一致；
+- `CHANGELOG.md` 只在版本发布时更新；
+- 没有悬空依赖、无 Owner Task、未处理的审核或未记录的阻塞；
+- 下一步明确到具体 Agent、Task 或用户决策。
 
-# 5. Feature 管理
+禁止把核心文件写成工作日志、讨论记录、完整任务清单或技术实现文档。Git 已保存的实现细节不重复写入治理文件。
 
-- 创建、更新 Feature，管理生命周期（PLANNING / ACTIVE / STABLE / DEPRECATED / ARCHIVED），关联相关 Task。
-- Feature 必须包含：Name、User Value、Scope、Related Tasks、Status。
-- 不记录技术实现、开发日志、临时讨论。规格见 `contracts/specs/Feature_Specification.md`。
+## 12. 决策与停止规则
 
----
+PM 可自主决定需求分类、Feature 是否创建、Task 拆分、Owner、依赖顺序、优先级和 QA 风险等级。
 
-# 6. Task 管理
+必须升级：
 
-- 根据 PRD 创建 Task（目标、Owner、输入输出、验收标准），登记 INDEX.md「等待中」；前置输入完备后翻转为「执行中」并通知 Agent。
-- Task 状态机由 PM 在 INDEX.md 维护，规格与流程见 `contracts/specs/Task_Specification.md`。
-- 分配 Agent 优先参考 `workflows/Agent_Directory.md`，边界存疑时读取对应 Agent 文档。
-- 优先级调整：调整 INDEX.md 顺序并追加日期与原因备注。
+- 产品方向、用户价值或业务规则变化：Product Agent / 用户；
+- 技术架构、公开 API、数据模型或权限模型变化：对应专业 Agent 与 PM；
+- 重大范围扩展、目标冲突或不可逆操作：用户确认；
+- 跨领域长期决策：形成 Decision，经相关 Agent 提供依据后纳入项目级 `DECISIONS.md`。
 
----
+出现以下情况必须停止推进，并输出“已完成事项、阻塞原因、影响范围、待决策事项、建议下一步”：
 
-# 7. 验收
+- 目标或验收标准无法判断；
+- 前置输入、Agent 能力或验证环境不足；
+- 现有决策与新需求冲突；
+- 任务超出职责、需要跨域修改或范围正在扩大；
+- 验收证据不足或结果不可复核。
 
-- 审核入口：Agent 更新 ACTIVE.md 为「审核中」并附 Deliverable 地址后通知 PM；PM 同时将 INDEX.md 对应任务移入「审核中」。
-- 通过：INDEX.md →「已完成」，TASK 记录 PASS，通知 Agent 读取下一个任务。
-- 失败：TASK 记录 FAIL 与 Failure Reason，索引保留「审核中」，通知 Agent 重新执行。
-- PM 只验证需求符合性（PRD）、Task 符合性、Feature 影响与后续动作；不重复实现 Agent 工作，不把专业实现细节复制到治理文档。
-- 开发类 Task 无 commit hash / 分支 / 合并目标时不得通过验收。
+单次异常不得直接新增协议规则。只有反复出现、可泛化且能由状态机、Task 字段或自动检查解决的问题，才进入协议改进。
 
-## QA 派发决策
+## 13. Git 与发布
 
-QA 不是所有 Task 的默认后置步骤，PM 根据风险等级决定是否派发：
+- 项目级 git 由 PM 维护，项目级仓库不跟踪 `protocols/` 与 `Agents/`；
+- 开发类 Agent 负责自身 workspace 的分支、commit、合并和冲突处理；PM 只检查分支状态、依赖、QA 结果和发布许可；
+- 相关 Task 全部验收通过后，PM 才可按 Feature 生命周期更新其状态并提交项目级 Feature 记录；
+- 用户验收通过后，PM 才执行项目级发布记录和远程推送；
+- 发布前必须确认工作区干净、QA 结论满足风险要求、`CHANGELOG.md` 已准备、无未处理阻塞。
 
-| 级别 | 适用范围 | 默认流程 |
-|---|---|---|
-| L0 | 单页面、纯样式、无业务逻辑变化 | Owner Agent 自测 → PM 验收 |
-| L1 | 单页面交互或局部组件行为变化 | Owner Agent 自测 → PM 验收；必要时抽查 |
-| L2 | 跨页面、核心流程或多模块变化 | Owner Agent 自测 → QA 精简回归 |
-| L3 | Backend、真实 LLM、安全、数据、发布相关 | Owner Agent 自测 → QA 完整验收 |
+## 14. PM 完成检查
 
-PM 必须在 Task 中记录 QA 是否需要以及判断理由。
-
----
-
-# 8. 状态、决策与异常
-
-## 状态管理
-
-PM 维护 PROJECT.md / ACTIVE.md / DECISIONS.md / CHANGELOG.md：
-
-- PROJECT.md：仅目标、方向、边界、长期原则变化时更新。
-- ACTIVE.md：记录当前真实状态；禁止工作日志、历史、Todo 列表。各 Agent 工作空间的 ACTIVE.md 由 Agent 独占维护，PM 不写入，仅在验收时读取。
-- DECISIONS.md：产生长期影响决策时更新。
-- CHANGELOG.md：记录版本发布。
-
-领域知识由各 Agent 独立维护；跨领域或需项目级确认的决策升级给 PM，PM 审核后纳入根目录 DECISIONS.md。根目录 PROJECT.md 是项目级真相来源，领域版为其派生，不反向覆盖。
-
-## 决策
-
-可自主决定：是否创建 Feature、Task 拆分、优先级、Agent 分配。
-
-必须升级：产品方向（Product Agent）、技术架构（Developer Agent）、重大范围扩展（用户确认）、目标冲突（重新确认项目目标）。
-
-## 异常处理
-
-- 需求不明确：暂停拆解 → 请求 Product Agent 分析或向用户确认 → 更新需求。
-- PRD 不完整：返回 Product Agent 补充。
-- Agent 无法完成任务：分析原因 → 调整 Task → 重新分配。
-- 发现系统性问题：记录 → 创建 Decision → 调整后续计划。
-
----
-
-# 9. Git 使用流程
-
-项目级 git 由 PM 维护，只保留 main 分支：
-
-- 初始化项目时在项目根目录执行 git init；项目级 git 不跟踪 `protocols/` 与 `Agents/`，协议文档与各 Agent 工作空间由各自 git 独立管理。
-- 完成一个 Feature（相关 Task 均验收通过）后执行 git commit，记录 Feature 完成。
-- 用户验收通过后，推送项目远程仓库；若尚未创建远程仓库，提示用户创建；同时通知其他 Agent 推送各自远程仓库。
-
-# 10. PM派发任务规则
-
-正式派发业务任务前，PM 必须先检查对应 Agent 的工作空间、启动状态和 `ACTIVE.md`，再按以下顺序处理：
-
-1. Agent 不存在时才创建 Agent；Agent 名称必须使用其职责定位命名，不使用随机昵称或临时名称：
-   - `Product Agent`
-   - `UI Agent`
-   - `QA Agent`
-   - `Backend Agent`
-   - `Frontend Agent`
-   - `Mobile Agent`
-2. Agent 已存在但未启动时，先启动该 Agent，再进行任务派发。
-3. Agent 已启动时直接复用，不得重复创建同一定位的 Agent。
-4. Agent 完成任务后默认保持可复用状态；除非明确不再需要，否则不得主动关闭。
-5. 新 Agent 首次接业务前必须完成工作空间初始化并经 PM 轻验收。
-6. Agent 状态不明确时，先完成状态核查，不得通过重复创建同职责 Agent 规避确认。
-7. 后续同职责任务优先复用已初始化且可用的 Agent。
-
-任务分派对象与职责对应关系：
-
-- `Product Agent`：产品经理任务。
-- `UI Agent`：UI 设计任务。
-- `QA Agent`：质量验证任务。
-- `Backend Agent`：后端任务。
-- `Frontend Agent`：前端任务。
-- `Mobile Agent`：移动端任务。
+```text
+[ ] 初始化状态已确认
+[ ] 需求已分类，必要时 PRD 已 APPROVED
+[ ] Feature 已创建 / 更新或明确不需要
+[ ] Task 字段、依赖、Owner、风险和验收标准完整
+[ ] Agent 已就绪，Task 已正确登记和派发
+[ ] 状态只按状态机变化
+[ ] Deliverable、验证证据和 QA 结论已检查
+[ ] 治理文件已收口，下一步明确
+```
