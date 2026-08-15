@@ -1,6 +1,6 @@
 # PM Workflow
 
-**版本：** 3.0
+**版本：** 3.2
 
 **定位：** PM 的项目协调执行流程。PM 负责把用户请求转化为可执行 Task、协调 Agent、验收交付并收口项目状态；不代替专业 Agent 实现。
 
@@ -117,7 +117,7 @@ Task 不规定实现方式，只规定目标、输入、约束、验收和交付
 5. 首次业务任务是否已完成工作空间初始化并通过轻验收；
 6. 是否存在同一 Agent 的执行中任务；若存在，不得并行派发第二个任务。
 
-Agent 不存在时才创建；已存在时复用，不通过重复创建同职责 Agent 规避状态确认。分配边界以 `workflows/Agent_Directory.md` 和对应 Agent contract 为准。
+Agent 不存在时按照系统的agent配置进行创建；已存在时复用，不通过重复创建同职责 Agent 规避状态确认。分配边界以 `workflows/Agent_Directory.md` 和对应 Agent contract 为准。
 
 派发通知只包含：Task 地址、Owner、前置依赖是否满足、启动后的状态和下一步。Task 已写明的信息不重复发送。
 
@@ -147,16 +147,17 @@ Agent 提交审核的入口是：自身 `ACTIVE.md` 为「审核中」，并附�
 
 1. 将对应 `INDEX.md` 改为「审核中」；
 2. 检查交付物地址可访问、结果覆盖 Acceptance Criteria、验证证据真实可复核；
-3. 检查是否越权、扩大范围或引入未批准决策；
-4. 开发类 Task 额外检查 Commit hash、Branch、Merge Target、Verification；
-5. 根据 Risk Level 检查 QA 是否按 Task 要求完成，不以形式完整代替专业证据。
+3. 按最小上下文审阅：只读取结论、验收标准与验证证据，不全文读取实现细节；接口 / 数据诊断只抽取验收相关字段；
+4. 检查是否越权、扩大范围或引入未批准决策；
+5. 开发类 Task 额外检查 Commit hash、Branch、Merge Target、Verification；
+6. 根据 Risk Level 检查 QA 是否按 Task 要求完成，不以形式完整代替专业证据；
 
 ### 审核通过
 
 - Task 文件记录 `Review Result: PASS`；
 - `INDEX.md` 改为「已完成」；
-- 若产生长期价值，沉淀到 Feature 或 Decision；
-- 通知 Agent 读取下一个「执行中」任务。
+- 通知 Agent 更新自己的ACTIVE；
+- 若产生长期价值，沉淀到 Feature 或 Decision。
 
 ### 审核失败
 
@@ -194,6 +195,8 @@ QA 结论是 PM 验收的输入：`QA Required: Yes` 的 Task 没有 QA `PASS`�
 - 下一步明确到具体 Agent、Task 或用户决策。
 
 禁止把核心文件写成工作日志、讨论记录、完整任务清单或技术实现文档。Git 已保存的实现细节不重复写入治理文件。
+
+用户需求没有明确完成时，不要关闭前后端服务和退出agent。
 
 ## 12. 决策与停止规则
 

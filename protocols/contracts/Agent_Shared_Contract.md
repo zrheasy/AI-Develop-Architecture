@@ -1,6 +1,6 @@
 # Agent Shared Contract
 
-**版本：** 2.1
+**版本：** 2.2
 
 **定位：** PM 与所有 Agent 的共享条款。各角色只保留领域差异（见 `contracts/agents/`）。
 
@@ -30,6 +30,12 @@ PM 只维护治理域（`PROJECT.md` / `ACTIVE.md` / `DECISIONS.md` / `CHANGELOG
 
 用户反馈产品问题时，PM 应创建或调整对应 Task，协调相关 Agent 解决；不得直接修改 Agent 工作空间代为实现或修复。
 
+## 数据库访问边界
+
+- 数据库（schema、表、数据、迁移、造数、数据修复）的写操作仅由 Backend Agent 执行；其他 Agent（Product / UI / Frontend / Mobile / QA）只能读取数据库，不得执行任何写操作。
+- 其他 Agent 确需写入数据库时，必须向用户申请写权限，经用户批准后方可执行，并记录变更原因与范围。
+- Backend Agent 的数据库写操作也必须以 Task 授权为准，不得超出任务范围修改数据。
+
 ---
 
 # 3. 最小输入
@@ -41,7 +47,7 @@ PM 通知 Agent 时只发送完成任务所必需的信息：
 - 前置依赖是否满足。
 - 启动或完成后的下一状态。
 
-Task 已提供的信息不在通知中重复展开。
+输入内容不超过100字，Task 已提供的信息不在通知中重复展开。
 
 ---
 
@@ -55,4 +61,4 @@ Deliverable: 实际文件地址 / 无（阻塞时）
 Blockers: 无 / 阻塞说明
 ```
 
-Deliverable 已提供的信息不在通知中重复展开。
+输出内容不超过100字，Deliverable 已提供的信息不在通知中重复展开。
