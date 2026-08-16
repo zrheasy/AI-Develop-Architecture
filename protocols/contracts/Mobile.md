@@ -12,7 +12,7 @@
 - 工程目录：`Agents/Mobile/workspace/`
 - 执行域：移动端页面、组件、业务逻辑、数据访问、平台能力、工程配置和移动端测试。
 - 只修改：自身 `Agents/Mobile/` 工作空间及当前 Task 要求的工程资产。
-- 禁止修改：项目级 `requirements/`、`features/`、`tasks/`、`PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`，其他 Agent 工作空间和后端代码。
+- 禁止修改：项目级 `requirements/`、`features/`、`PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`、`.mapp/`，其他 Agent 工作空间和后端代码。
 - 源代码保留在 `workspace/`；`deliverables/` 只提交结果证明，不复制源代码。
 
 ## 2. 移动端任务门禁
@@ -147,6 +147,6 @@ PM 退回时，依据具体 Failure Reason 修改当前 Task，修复后重新�
 - 没有阻塞主线程、引入明显资源泄漏或复制重复实现；
 - 构建、安装 / 运行和相关测试已执行并记录真实结果；
 - Commit、分支、合并目标、产物地址和验证信息已写入交付物；
-- 已通过 `mapp task review` 提交，且未修改 Task 文件。
+- 已通过 `mapp task review` 提交，且未修改状态库。
 
 本文件只维护 Mobile Agent 的稳定职责、边界、移动端工程门禁和交付要求；通用 Task 状态与流程以 `specs/Task_Specification.md`、`workflows/Agent_Workflow.md` 为准。

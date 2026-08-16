@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import sys
 
 from mapp import context as ctx_mod
 from mapp import db, taskfile
@@ -86,35 +87,63 @@ def cmd_init(args):
     print(f"已初始化 mapp 数据库: {path}")
 
 
-def cmd_task_add(args):
-    conn, root = _get_conn(args)
-    task_path = _resolve(root, args.file)
-    if not os.path.isfile(task_path):
-        raise SystemExit(f"任务文件不存在: {task_path}")
-    parsed = taskfile.parse_task(task_path)
+def _insert_task(conn, parsed, priority, actor="PM"):
+    """校验并把解析后的任务写入数据库；已存在则抛错。"""
     owner = normalize_owner(parsed["owner_raw"])
-    rel = os.path.relpath(task_path, root)
-    parts = rel.split(os.sep)
-    base = os.path.basename(task_path)
-    if len(parts) < 3 or parts[0] != "tasks" or parts[1] != owner:
-        raise SystemExit(f"任务文件位置与 Owner 不符: {rel}（应为 tasks/{owner}/TASK-*.md）")
-    if not (base.startswith("TASK-") and base.endswith(".md")):
-        raise SystemExit(f"任务文件名非法: {base}")
-    if base[:-3] != parsed["id"]:
-        raise SystemExit(f"任务 ID 与文件名不一致: {parsed['id']} != {base[:-3]}")
     if conn.execute("SELECT 1 FROM tasks WHERE id = ?", (parsed["id"],)).fetchone():
         raise SystemExit(f"任务已存在: {parsed['id']}")
     now = db.now()
     conn.execute(
         "INSERT INTO tasks(id, title, owner, status, risk_level, qa_required, qa_reason, "
-        "priority, file, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "priority, goal, context, acceptance, deliverable_spec, created_at, updated_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (parsed["id"], parsed["title"], owner, WAITING, parsed["risk_level"],
-         int(parsed["qa_required"]), parsed["qa_reason"], args.priority, task_path, now, now),
+         int(parsed["qa_required"]), parsed["qa_reason"], priority,
+         parsed["goal"], parsed["context"], parsed["acceptance"], parsed["deliverable_spec"],
+         now, now),
     )
-    _record(conn, parsed["id"], None, WAITING, "PM", "创建任务")
+    _record(conn, parsed["id"], None, WAITING, actor, "创建任务")
+
+
+def cmd_task_add(args):
+    conn, root = _get_conn(args)
+    text = sys.stdin.read()
+    if not text.strip():
+        raise SystemExit("stdin 为空：请通过管道粘贴任务 Markdown")
+    parsed = taskfile.parse_task(text)
+    _insert_task(conn, parsed, args.priority)
+    owner = normalize_owner(parsed["owner_raw"])
     conn.commit()
     conn.close()
     print(f"已登记 {parsed['id']}（等待中），可用 `mapp task list --owner {owner}` 查看")
+
+
+def cmd_task_import(args):
+    conn, root = _get_conn(args)
+    src = _resolve(root, args.dir)
+    if not os.path.isdir(src):
+        raise SystemExit(f"目录不存在: {src}")
+    added, skipped, failed = 0, 0, []
+    for dirpath, _dirs, files in os.walk(src):
+        for name in sorted(files):
+            if not (name.startswith("TASK-") and name.endswith(".md")):
+                continue
+            path = os.path.join(dirpath, name)
+            try:
+                with open(path, encoding="utf-8") as fh:
+                    parsed = taskfile.parse_task(fh.read())
+                _insert_task(conn, parsed, "P1", actor="IMPORT")
+                added += 1
+            except SystemExit:
+                skipped += 1
+            except ValueError as exc:
+                skipped += 1
+                failed.append(f"{os.path.relpath(path, root)}: {exc}")
+    conn.commit()
+    conn.close()
+    print(f"导入完成: 新增 {added}，跳过 {skipped}")
+    for item in failed:
+        print(f"  - {item}")
 
 
 def cmd_task_assign(args):
@@ -128,14 +157,13 @@ def cmd_task_assign(args):
     ).fetchall()
     if active:
         raise SystemExit(f"{row['owner']} 已有进行中任务 {', '.join(r['id'] for r in active)}，不得并行派发")
-    parsed = taskfile.parse_task(row["file"])
     missing = [
         name
         for name, value in (
-            ("Goal", parsed["goal"]),
-            ("Context", parsed["context"]),
-            ("Acceptance Criteria", parsed["acceptance"]),
-            ("Deliverable", parsed["deliverable"]),
+            ("Goal", row["goal"]),
+            ("Context", row["context"]),
+            ("Acceptance Criteria", row["acceptance"]),
+            ("Deliverable", row["deliverable_spec"]),
         )
         if not value
     ]
@@ -203,7 +231,6 @@ def cmd_task_fail(args):
     _agent_status(conn, row["owner"], "executing", args.id)
     conn.commit()
     conn.close()
-    taskfile.patch_review_result(row["file"], "FAIL", args.reason)
     print(f"{args.id} → 执行中（FAIL）")
 
 
@@ -236,7 +263,6 @@ def cmd_task_pass(args):
     _agent_status(conn, row["owner"], "idle", None)
     conn.commit()
     conn.close()
-    taskfile.patch_review_result(row["file"], "PASS")
     print(f"{args.id} → 已完成（PASS）")
 
 
@@ -274,14 +300,8 @@ def cmd_qa(args):
 def cmd_task_show(args):
     conn, root = _get_conn(args)
     row = _get_task(conn, args.id)
-    print(f"ID: {row['id']}")
-    print(f"Title: {row['title']}")
-    print(f"Owner: {row['owner']}")
     print(f"Status: {label(row['status'])}")
-    print(f"Risk Level: {row['risk_level']}")
-    print(f"QA Required: {'Yes' if row['qa_required'] else 'No'}")
     print(f"Priority: {row['priority']}")
-    print(f"File: {row['file']}")
     if row["deliverable"]:
         print(f"Deliverable: {row['deliverable']}")
     if row["commit_hash"]:
@@ -290,6 +310,8 @@ def cmd_task_show(args):
         print(f"Review Result: {row['review_result']}")
     if row["failure_reason"]:
         print(f"Failure Reason: {row['failure_reason']}")
+    print("")
+    print(taskfile.render_task(dict(row)))
     conn.close()
 
 
@@ -362,8 +384,9 @@ def cmd_audit(args):
 def cmd_context(args):
     conn, root = _get_conn(args)
     row = _get_task(conn, args.id)
-    parsed = taskfile.parse_task(row["file"])
-    print(ctx_mod.render_context(root, parsed))
+    task = dict(row)
+    task["owner"] = normalize_owner(row["owner"]) + " Agent"
+    print(ctx_mod.render_context(root, task))
     conn.close()
 
 
@@ -380,10 +403,13 @@ def build_parser():
     task = sub.add_parser("task", help="任务状态管理")
     tsub = task.add_subparsers(dest="task_command", required=True)
 
-    p = tsub.add_parser("add", help="登记任务（等待中）")
-    p.add_argument("file", help="任务文件路径，相对项目根目录")
+    p = tsub.add_parser("add", help="从 stdin 登记任务（等待中）")
     p.add_argument("--priority", default="P1", help="优先级（默认 P1）")
     p.set_defaults(func=cmd_task_add)
+
+    p = tsub.add_parser("import", help="从目录批量导入存量任务（TASK-*.md）")
+    p.add_argument("dir", help="任务目录（含存量 TASK-*.md）")
+    p.set_defaults(func=cmd_task_import)
 
     p = tsub.add_parser("assign", help="派发任务（等待中→执行中）")
     p.add_argument("id")

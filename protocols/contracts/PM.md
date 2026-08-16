@@ -8,7 +8,7 @@
 
 - Agent Name：PM Agent
 - Workspace：项目根目录
-- 执行域：`PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`、`CHANGELOG.md`、`requirements/`、`features/`、`tasks/`、`decisions/`
+- 执行域：`PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`、`CHANGELOG.md`、`requirements/`、`features/`、`decisions/`、`.mapp/mapp.db`
 - 禁止修改：任何 `Agents/{Agent}/` 工作空间；禁止直接实现专业 Agent 的任务。
 - 唯一协调入口：所有用户需求先由 PM 判断，不让其他 Agent 自行接收、拆解或扩展用户需求。
 
@@ -29,7 +29,7 @@ Task 状态唯一权威是 `.mapp/mapp.db`，状态只允许沿以下路径变�
 
 验收失败时，PM 通过 `mapp task fail --reason ...` 填写 `FAIL` 与 `Failure Reason` 并将任务置为「执行中」；Agent 完成返工后再次通过 `mapp task review` 提交「审核中」。
 
-PM 必须通过 `mapp` 命令维护状态；Agent 不得自行修改索引、Task 文件或状态库。
+PM 必须通过 `mapp` 命令维护状态；Agent 不得自行修改状态库。
 
 以下不变量始终成立：
 
@@ -59,7 +59,7 @@ PM 不得替专业 Agent 做实现决策，也不得通过直接改代码绕过 
 - `ACTIVE.md`：仅记录项目当前真实状态、阻塞和下一步，不写过程日志。
 - `DECISIONS.md`：仅记录未来仍有影响的已确认决策、原因和影响。
 - `CHANGELOG.md`：仅记录发布版本。
-- `features/`、`requirements/`、`tasks/`、`decisions/`：只记录对应对象的最终状态，不记录讨论过程。
+- `features/`、`requirements/`、`decisions/`：只记录对应对象的最终状态，不记录讨论过程。
 
 Git 已保存的实现细节不重复写入治理文档；协议与项目状态冲突时，以代码和当前可验证状态为准，并创建必要的决策修正。
 

@@ -15,9 +15,7 @@ Task 定义结果，不规定具体实现方式。
 
 ## 2. 存储结构
 
-`tasks/{Agent}/` 包含 `TASK-XXX.md` 任务文件，由 PM 创建和维护。任务状态、优先级与文件地址存于 `.mapp/mapp.db`，通过 `mapp task list --owner {Agent}` / `mapp task show <id>` 读取，不再生成 INDEX.md。
-
-任务文件始终原地存放，状态唯一权威是 `.mapp/mapp.db`，不随状态移动文件。
+任务内容与状态统一存于 `.mapp/mapp.db` 的 `tasks` 表（含 ID、Title、Owner、Goal、Context、Acceptance Criteria、Deliverable、Risk Level、QA Required、状态与验收结果），不再生成任务文件或 INDEX.md。任务创建通过 `mapp task add` 从 stdin 读取 Markdown 内容入库；存量任务文件可通过 `mapp task import` 一次性导入后不再维护。
 
 ## 3. 状态机
 
@@ -38,7 +36,7 @@ Task 定义结果，不规定具体实现方式。
 | 阻塞中 | 当前任务因输入、环境、权限或依赖无法继续 | 填写阻塞信息并等待 PM 解除；不得继续猜测或扩大范围 |
 | 已完成 | PM 已验收通过 | 不再执行；长期价值沉淀到 Feature 或 Decision |
 
-PM 通过 `mapp` 命令维护状态。Agent 不修改 Task 文件，也不自行翻转任务状态。
+PM 通过 `mapp` 命令维护状态。Agent 不修改状态库，也不自行翻转任务状态。
 
 ## 4. 任务模板
 
@@ -103,15 +101,14 @@ QA Task 必须明确验证目标、排除范围、测试边界、所需证据以
 ## 5. PM 创建与分配
 
 1. 分析需求：确认关联 Feature、Owner、风险等级和前置输入。
-2. 创建任务文件，填写目标、上下文、验收标准和交付要求。
-3. 通过 `mapp task add` 登记为「等待中」。
-4. 前置输入完备后，通过 `mapp task assign` 翻转为「执行中」并通知 Owner Agent。
+2. 通过 `mapp task add` 从 stdin 提交任务内容（ID、Title、Owner、Goal、Context、Risk Level、QA Required、Acceptance Criteria、Deliverable），登记为「等待中」。
+3. 前置输入完备后，通过 `mapp task assign` 翻转为「执行中」并通知 Owner Agent。
 
 前置输入不足时，PM 不得将任务翻转为「执行中」。
 
 ## 6. Agent 获取与执行
 
-Agent 通过 `mapp context <task-id>` 获取任务内容与引用输入（只获取 Task 文件声明的上下文），通过 `mapp task list --owner {Agent} --status 执行中` 确认当前任务。
+Agent 通过 `mapp context <task-id>` 获取任务内容与引用输入（只获取 Task 内容声明的上下文），通过 `mapp task list --owner {Agent} --status 执行中` 确认当前任务。
 
 Agent 读取任务的 `Goal`、`Context`、`Acceptance Criteria` 和 `Deliverable` 后，自主决定实现方案、执行步骤与技术选择。
 
@@ -132,8 +129,8 @@ Agent 读取任务的 `Goal`、`Context`、`Acceptance Criteria` 和 `Deliverabl
 
 ### PM
 
-- 验收通过：通过 `mapp task pass` 置为「已完成」，自动记录 `PASS` 并回写任务文件，通知 Agent 获取下一个任务。
-- 验收失败：通过 `mapp task fail` 记录 `FAIL` 和具体 `Failure Reason`，置为「执行中」并回写任务文件，通知原 Agent 返工。
+- 验收通过：通过 `mapp task pass` 置为「已完成」，自动记录 `PASS`，通知 Agent 获取下一个任务。
+- 验收失败：通过 `mapp task fail` 记录 `FAIL` 和具体 `Failure Reason`，置为「执行中」，通知原 Agent 返工。
 - 收到阻塞通知：通过 `mapp task block` 置为「阻塞中」；阻塞解除后 `mapp task unblock` 置回「执行中」并通知 Agent。
 
 ## 8. 开发类 Task 的版本交付

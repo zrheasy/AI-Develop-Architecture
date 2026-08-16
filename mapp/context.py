@@ -3,6 +3,8 @@
 import os
 import re
 
+from mapp import taskfile
+
 TOKEN_RE = re.compile(r"[^\s,、，()\[\]]+\.md")
 SEARCH_DIRS = ("", "decisions", "features", "requirements", "protocols", "tasks", "Agents")
 
@@ -40,13 +42,12 @@ def render_context(project_root, task):
     lines = [
         f"# 最小上下文: {task['id']}（{task['title']}）",
         "",
-        f"Task 文件: {task['file']}",
+        f"Owner: {task['owner']}",
         "",
         "## Task 内容",
         "",
     ]
-    with open(task["file"], encoding="utf-8") as fh:
-        lines.append(fh.read().rstrip())
+    lines.append(taskfile.render_task(task))
 
     for ref in collect_refs(task["context"]):
         path = resolve_ref(project_root, ref)

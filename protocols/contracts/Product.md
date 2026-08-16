@@ -11,7 +11,7 @@
 - Workspace：`Agents/Product/`
 - 执行域：产品分析、用户场景、用户流程、PRD 草案、产品原则与产品领域资产。
 - 只修改：自身 `Agents/Product/` 工作空间及当前 Task 要求的交付物。
-- 禁止修改：项目级 `requirements/`、`features/`、`tasks/`、`PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`，以及其他 Agent 工作空间。
+- 禁止修改：项目级 `requirements/`、`features/`、`PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`、`.mapp/`，以及其他 Agent 工作空间。
 - 唯一上游：用户需求由 PM 转交；Product Agent 不直接接受并推进用户需求，不自行创建 Feature 或 Task。
 
 ## 2. 产品任务门禁

@@ -23,13 +23,14 @@ python -m mapp --project . init
 | 命令 | 作用 |
 |---|---|
 | `init` | 初始化数据库 |
-| `task add <file> [--priority P]` | 登记任务为「等待中」 |
+| `task add [--priority P]` | 从 stdin 登记任务为「等待中」 |
+| `task import <dir>` | 从目录批量导入存量任务（幂等，重复跳过） |
 | `task assign <id>` | 等待中→执行中（校验前置字段与并行不变量） |
 | `task review <id> --deliverable <path>` | 执行中→审核中（Agent 提交入口） |
 | `task block <id> --reason ...` | 执行中→阻塞中 |
 | `task unblock <id>` | 阻塞中→执行中 |
-| `task fail <id> --reason ...` | 审核中→执行中（记录 FAIL，回写任务文件） |
-| `task pass <id>` | 审核中→已完成（校验 QA 与 Commit 门禁，回写任务文件） |
+| `task fail <id> --reason ...` | 审核中→执行中（记录 FAIL 与 Failure Reason） |
+| `task pass <id>` | 审核中→已完成（校验 QA 与 Commit 门禁） |
 | `task commit <id> --hash ... --branch ... --target ... [--verification ...]` | 记录开发类 Commit 信息 |
 | `task show <id>` / `task list [--owner O] [--status S]` | 查询任务 |
 | `qa <id> --result PASS\|FAIL\|BLOCKED [--report path]` | 记录 QA 结论；BLOCKED 自动置任务阻塞 |
@@ -44,7 +45,7 @@ python -m mapp --project . init
 - 缺少 Goal / Context / Acceptance Criteria / Deliverable 不得进入执行中。
 - QA Required=Yes 无 QA PASS 不得验收通过；QA BLOCKED 置任务阻塞。
 - 开发类（Frontend / Backend / Mobile）缺 Commit hash / Branch / Merge Target / Verification 不得验收通过。
-- 任务文件位置必须与 Owner 对应（`tasks/{Owner}/TASK-*.md`），ID 必须与文件名一致。
+- 任务内容与状态统一存于数据库；`mapp task import` 可一次性导入存量任务文件（幂等，重复跳过）。
 
 ## 协议衔接
 

@@ -11,7 +11,7 @@
 - Workspace：`Agents/UI/`
 - 执行域：页面结构、布局、视觉表现、交互表现、组件规范、设计资产和实现指引。
 - 只修改：自身 `Agents/UI/` 工作空间及当前 Task 要求的设计交付物。
-- 禁止修改：项目级 `requirements/`、`features/`、`tasks/`、`PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`，以及其他 Agent 工作空间或源代码。
+- 禁止修改：项目级 `requirements/`、`features/`、`PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`、`.mapp/`，以及其他 Agent 工作空间或源代码。
 - 唯一上游：用户价值和产品行为由 PRD、Feature 或 Task 提供；UI Agent 不自行改变产品目标、创建 Feature 或拆解 Task。
 
 ## 2. 设计任务门禁

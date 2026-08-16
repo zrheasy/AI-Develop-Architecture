@@ -32,7 +32,7 @@ PM 收到用户请求后，必须按以下顺序推进：
 
 - `PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`、`CHANGELOG.md` 存在且内容有效；
 - `PROJECT.md` 的目标、边界和产品形态已明确，不存在「等待确认」；
-- 根目录的项目骨架和 `tasks/{Agent}/` 已建立；
+- 根目录的项目骨架已建立，且 `mapp init` 已完成；
 - 本次任务涉及的 Agent 工作空间已初始化并通过轻验收。
 
 ### 未初始化处理
@@ -40,7 +40,7 @@ PM 收到用户请求后，必须按以下顺序推进：
 按以下顺序执行，未完成前不得创建业务 Feature 或业务 Task：
 
 1. 在项目根目录初始化 git（已存在则跳过），并确保项目级仓库使用 `main` 作为唯一长期分支；
-2. 建立 `README`、四个核心文件、`requirements/`、`features/`、`tasks/{Agent}/` 和 `decisions/` 骨架；Agent 工作空间由对应 Agent 通过初始化 Task 创建；
+2. 建立 `README`、四个核心文件、`requirements/`、`features/`、`decisions/` 骨架；Agent 工作空间由对应 Agent 通过初始化 Task 创建；
 3. 创建 `PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`、`CHANGELOG.md` 骨架；
 4. 运行 `mapp init` 初始化状态库（`.mapp/mapp.db`）；
 5. 初始化 Product Agent 工作空间并轻验收；
@@ -101,9 +101,8 @@ PM 根据已批准的 PRD / Feature / 维护请求拆解 Task。每个 Task 必�
 执行顺序：
 
 1. 按 Agent 职责拆分，保持一个 Task 一个主要 Owner；
-2. 将 Task 写入 `tasks/{Agent}/TASK-XXX.md`；
-3. 通过 `mapp task add` 登记为「等待中」；
-4. 前置输入全部满足后，通过 `mapp task assign` 进入「执行中」。
+2. 通过 `mapp task add` 从 stdin 提交任务内容（Markdown）并登记为「等待中」；
+3. 前置输入全部满足后，通过 `mapp task assign` 进入「执行中」。
 
 Task 不规定实现方式，只规定目标、输入、约束、验收和交付证明。详细模板以 `Task_Specification.md` 为准。
 
@@ -136,7 +135,7 @@ Task 状态由 `mapp` 在 `.mapp/mapp.db` 维护，允许路径为：
 执行期间：
 
 - Agent 一次只执行一个 Task；PM 不在审核期间派发其下一个 Task；
-- Agent 不修改 Task 文件或状态库；状态流转只能通过 `mapp` 命令；
+- Agent 不修改状态库；状态流转只能通过 `mapp` 命令；
 - PM 关注输入是否满足、范围是否变化、阻塞是否真实，不介入专业实现过程；
 - 发现需求变化、跨域修改、决策冲突或输入不足时，暂停当前推进，重新拆解或升级；
 - Agent 报告阻塞时，通过 `mapp task block` 置为「阻塞中」；解除后 `mapp task unblock` 置回「执行中」并通知 Agent；

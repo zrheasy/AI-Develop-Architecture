@@ -58,7 +58,7 @@ Feature / Task / Decision 引用。
 
 # 4. 不记录
 
-历史过程、完整任务列表、技术实现细节、已完成工作的日志。任务内容与状态保存在 `tasks/`，技术决策保存在 `DECISIONS.md` 或 Task Deliverable。
+历史过程、完整任务列表、技术实现细节、已完成工作的日志。任务内容与状态保存在 `.mapp/mapp.db`，技术决策保存在 `DECISIONS.md` 或 Task Deliverable。
 
 ---
 

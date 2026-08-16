@@ -13,24 +13,27 @@ CREATE TABLE IF NOT EXISTS agents (
 );
 
 CREATE TABLE IF NOT EXISTS tasks (
-    id            TEXT PRIMARY KEY,
-    title         TEXT NOT NULL,
-    owner         TEXT NOT NULL REFERENCES agents(name),
-    status        TEXT NOT NULL,
-    risk_level    TEXT NOT NULL,
-    qa_required   INTEGER NOT NULL DEFAULT 0,
-    qa_reason     TEXT NOT NULL DEFAULT '',
-    priority      TEXT NOT NULL DEFAULT 'P1',
-    file          TEXT NOT NULL,
-    deliverable   TEXT,
-    commit_hash   TEXT,
-    branch        TEXT,
-    merge_target  TEXT,
-    verification  TEXT,
-    review_result TEXT,
-    failure_reason TEXT,
-    created_at    TEXT NOT NULL,
-    updated_at    TEXT NOT NULL
+    id              TEXT PRIMARY KEY,
+    title           TEXT NOT NULL,
+    owner           TEXT NOT NULL REFERENCES agents(name),
+    status          TEXT NOT NULL,
+    risk_level      TEXT NOT NULL,
+    qa_required     INTEGER NOT NULL DEFAULT 0,
+    qa_reason       TEXT NOT NULL DEFAULT '',
+    priority        TEXT NOT NULL DEFAULT 'P1',
+    goal            TEXT NOT NULL DEFAULT '',
+    context         TEXT NOT NULL DEFAULT '',
+    acceptance      TEXT NOT NULL DEFAULT '',
+    deliverable_spec TEXT NOT NULL DEFAULT '',
+    deliverable     TEXT,
+    commit_hash     TEXT,
+    branch          TEXT,
+    merge_target    TEXT,
+    verification    TEXT,
+    review_result   TEXT,
+    failure_reason  TEXT,
+    created_at      TEXT NOT NULL,
+    updated_at      TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS task_events (
@@ -73,9 +76,25 @@ def init_db(path):
     conn = connect(path)
     try:
         conn.executescript(SCHEMA)
+        _migrate(conn)
         conn.commit()
     finally:
         conn.close()
+
+
+def _migrate(conn):
+    """旧库（含 file 列、缺内容列）平滑升级：补充内容列并移除 file 列。"""
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(tasks)").fetchall()}
+    for col, decl in (
+        ("goal", "TEXT NOT NULL DEFAULT ''"),
+        ("context", "TEXT NOT NULL DEFAULT ''"),
+        ("acceptance", "TEXT NOT NULL DEFAULT ''"),
+        ("deliverable_spec", "TEXT NOT NULL DEFAULT ''"),
+    ):
+        if col not in cols:
+            conn.execute(f"ALTER TABLE tasks ADD COLUMN {col} {decl}")
+    if "file" in cols:
+        conn.execute("ALTER TABLE tasks DROP COLUMN file")
 
 
 def now():

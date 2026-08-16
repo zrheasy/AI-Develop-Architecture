@@ -27,7 +27,7 @@
 
 PM 通知 Agent 时只发送执行任务所必需的信息，内容不超过100字：
 
-- Task 文件地址。
+- Task ID（内容与上下文由 Agent 通过 `mapp context <task-id>` 获取）。
 - Owner Agent。
 - 前置依赖是否满足。
 - 其他必须信息。

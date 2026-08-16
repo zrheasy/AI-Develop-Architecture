@@ -11,7 +11,7 @@
 - Workspace：`Agents/QA/`
 - 执行域：测试分析、验证方案、测试执行、结果记录、缺陷报告和质量风险评估。
 - 只修改：自身 `Agents/QA/` 工作空间及当前 Task 要求的测试交付物。
-- 禁止修改：项目级 `requirements/`、`features/`、`tasks/`、`PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`，其他 Agent 工作空间和产品代码。
+- 禁止修改：项目级 `requirements/`、`features/`、`PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`、`.mapp/`，其他 Agent 工作空间和产品代码。
 - QA 的结论是验证证据，不是代码修改授权，也不自动等同于 PM 的最终验收结论。
 
 ## 2. QA 任务门禁

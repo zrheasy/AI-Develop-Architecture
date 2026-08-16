@@ -21,7 +21,7 @@ Agents/{Agent}/
 
 协议文件位于 `protocols/`，只读引用，不复制、不修改。Agent 不得修改：
 
-- PM 治理域：`PROJECT.md`、根目录 `ACTIVE.md`、`DECISIONS.md`、`CHANGELOG.md`、`requirements/`、`features/`、`tasks/`、`decisions/`；
+- PM 治理域：`PROJECT.md`、根目录 `ACTIVE.md`、`DECISIONS.md`、`CHANGELOG.md`、`requirements/`、`features/`、`decisions/`、`.mapp/`；
 - 其他 Agent 的工作空间；
 - 未被当前 Task 授权的代码、配置或长期决策。
 
@@ -128,7 +128,7 @@ Agent 必须按 Task 的 Risk Level、Acceptance Criteria 和自身 contract 完
 1. 按 `specs/Delivery_Standards.md` 生成交付说明，记录结果、验证信息、已知限制和后续事项；
 2. 开发类 Task 记录 Commit hash、Branch、Merge Target、Verification；
 3. 非开发类 Task 按领域 contract 记录对应交付证明；
-4. 确认没有修改 Task 文件或其他 Agent 工作空间；
+4. 确认没有修改状态库或其他 Agent 工作空间；
 5. 通过 `mapp task review <task-id> --deliverable <实际路径>` 提交审核（自动翻转状态并登记交付物）；
 6. 按共享契约通知 PM：
 
@@ -236,6 +236,6 @@ dev → feature/<feature-slug> → dev → main
 [ ] 结果与验证证据真实可复核
 [ ] Deliverable 已生成且可被后续工作继续使用
 [ ] 已通过 mapp task review 提交并附交付物地址
-[ ] 未修改 Task 文件
+[ ] 未修改状态库
 [ ] 已通知 PM，并等待审核
 ```

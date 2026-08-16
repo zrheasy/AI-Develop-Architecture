@@ -37,7 +37,7 @@ User Request → Product Requirement → Feature → Task → Deliverable
 
 - 协议文档统一存放于 `protocols/`：`contracts/`（职责与规范）、`specs/`（对象规格）、`workflows/`（协作流程）、`BASIC_MAPP.md`（顶层理念）。
 - Agent 工作空间位于根目录 `Agents/{Agent}/`，不包含协议文件，只包含 `PROJECT.md` / `ACTIVE.md` / `DECISIONS.md` / `workspace/` / `deliverables/`。
-- 项目级运行时文件（`PROJECT.md` / `ACTIVE.md` / `DECISIONS.md` / `CHANGELOG.md`、`tasks/`、`features/`、`requirements/`、`decisions/`）不属于协议文档，位于项目根目录，由 PM 创建与维护。
+- 项目级运行时文件（`PROJECT.md` / `ACTIVE.md` / `DECISIONS.md` / `CHANGELOG.md`、`.mapp/`、`features/`、`requirements/`、`decisions/`）不属于协议文档，位于项目根目录，由 PM 创建与维护。
 
 ---
 

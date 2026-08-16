@@ -1,6 +1,7 @@
 import contextlib
 import io
 import os
+import sys
 import tempfile
 import unittest
 
@@ -108,13 +109,22 @@ class MappFlowTest(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def run_cli(self, *args, expect_error=False):
+    def run_cli(self, *args, stdin_text=None, expect_error=False):
         argv = ["--project", self.root] + list(args)
-        if expect_error:
-            with self.assertRaises(SystemExit):
+        old_stdin = sys.stdin
+        if stdin_text is not None:
+            sys.stdin = io.StringIO(stdin_text)
+        try:
+            if expect_error:
+                with self.assertRaises(SystemExit):
+                    main(argv)
+            else:
                 main(argv)
-            return
-        main(argv)
+        finally:
+            sys.stdin = old_stdin
+
+    def add_task(self, text):
+        self.run_cli("task", "add", stdin_text=text)
 
     def capture(self, *args):
         buf = io.StringIO()
@@ -130,7 +140,7 @@ class MappFlowTest(unittest.TestCase):
         return os.path.relpath(path, self.root)
 
     def test_add_lists_from_db(self):
-        self.run_cli("task", "add", "tasks/Backend/TASK-BE-100.md")
+        self.add_task(BACKEND_TASK)
         out = self.capture("task", "list", "--owner", "Backend")
         self.assertIn("TASK-BE-100", out)
         self.assertIn("等待中", out)
@@ -138,18 +148,15 @@ class MappFlowTest(unittest.TestCase):
         self.assertFalse(os.path.exists(os.path.join(self.root, "tasks", "Backend", "INDEX.md")))
 
     def test_assign_requires_complete_fields(self):
-        text = open(self.be_file, encoding="utf-8").read()
-        text = text.replace(
+        text = BACKEND_TASK.replace(
             "## Deliverable\n- [交付说明](../../Agents/Backend/deliverables/TASK-BE-100.md)\n",
             "## Deliverable\n",
         )
-        with open(self.be_file, "w", encoding="utf-8") as fh:
-            fh.write(text)
-        self.run_cli("task", "add", "tasks/Backend/TASK-BE-100.md")
+        self.add_task(text)
         self.run_cli("task", "assign", "TASK-BE-100", expect_error=True)
 
     def test_full_flow_with_qa_gate(self):
-        self.run_cli("task", "add", "tasks/Backend/TASK-BE-100.md")
+        self.add_task(BACKEND_TASK)
         self.run_cli("task", "assign", "TASK-BE-100")
         deliverable = self.make_deliverable("Backend", "TASK-BE-100")
         self.run_cli("task", "review", "TASK-BE-100", "--deliverable", deliverable)
@@ -170,7 +177,7 @@ class MappFlowTest(unittest.TestCase):
         self.assertIn("审核中 → 已完成", out)
 
     def test_dev_commit_gate(self):
-        self.run_cli("task", "add", "tasks/Frontend/TASK-FE-100.md")
+        self.add_task(FRONTEND_TASK)
         self.run_cli("task", "assign", "TASK-FE-100")
         deliverable = self.make_deliverable("Frontend", "TASK-FE-100")
         self.run_cli("task", "review", "TASK-FE-100", "--deliverable", deliverable)
@@ -182,21 +189,18 @@ class MappFlowTest(unittest.TestCase):
         self.run_cli("task", "pass", "TASK-FE-100")
 
     def test_no_parallel(self):
-        self.run_cli("task", "add", "tasks/Backend/TASK-BE-100.md")
-        second = os.path.join(self.root, "tasks", "Backend", "TASK-BE-101.md")
-        text = (
-            open(self.be_file, encoding="utf-8").read()
+        self.add_task(BACKEND_TASK)
+        second = (
+            BACKEND_TASK
             .replace("TASK-BE-100", "TASK-BE-101")
             .replace("测试后端任务", "第二个任务")
         )
-        with open(second, "w", encoding="utf-8") as fh:
-            fh.write(text)
-        self.run_cli("task", "add", "tasks/Backend/TASK-BE-101.md")
+        self.add_task(second)
         self.run_cli("task", "assign", "TASK-BE-100")
         self.run_cli("task", "assign", "TASK-BE-101", expect_error=True)
 
     def test_block_unblock(self):
-        self.run_cli("task", "add", "tasks/Backend/TASK-BE-100.md")
+        self.add_task(BACKEND_TASK)
         self.run_cli("task", "assign", "TASK-BE-100")
         self.run_cli("task", "block", "TASK-BE-100", "--reason", "环境不可用")
         out = self.capture("task", "list", "--status", "阻塞中")
@@ -206,21 +210,30 @@ class MappFlowTest(unittest.TestCase):
         self.assertIn("TASK-BE-100", out)
 
     def test_fail_patches_file_and_returns_to_executing(self):
-        self.run_cli("task", "add", "tasks/Backend/TASK-BE-100.md")
+        self.add_task(BACKEND_TASK)
         self.run_cli("task", "assign", "TASK-BE-100")
         deliverable = self.make_deliverable("Backend", "TASK-BE-100")
         self.run_cli("task", "review", "TASK-BE-100", "--deliverable", deliverable)
         self.run_cli("task", "fail", "TASK-BE-100", "--reason", "验收证据不足")
-        content = open(self.be_file, encoding="utf-8").read()
-        self.assertIn("FAIL", content)
-        self.assertIn("验收证据不足", content)
+        out = self.capture("task", "show", "TASK-BE-100")
+        self.assertIn("Review Result: FAIL", out)
+        self.assertIn("验收证据不足", out)
         self.run_cli("task", "review", "TASK-BE-100", "--deliverable", deliverable)
 
     def test_qa_blocked_flips_task(self):
-        self.run_cli("task", "add", "tasks/Backend/TASK-BE-100.md")
+        self.add_task(BACKEND_TASK)
         self.run_cli("task", "assign", "TASK-BE-100")
         deliverable = self.make_deliverable("Backend", "TASK-BE-100")
         self.run_cli("task", "review", "TASK-BE-100", "--deliverable", deliverable)
         self.run_cli("qa", "TASK-BE-100", "--result", "BLOCKED", "--report", "Agents/QA/deliverables/blocked.md")
         out = self.capture("task", "list", "--status", "阻塞中")
         self.assertIn("TASK-BE-100", out)
+
+    def test_import_existing_files(self):
+        """存量任务文件通过 task import 一次性入库，之后不再依赖文件。"""
+        self.run_cli("task", "import", "tasks")
+        out = self.capture("task", "list")
+        self.assertIn("TASK-BE-100", out)
+        self.assertIn("TASK-FE-100", out)
+        # 重复导入应跳过（幂等）
+        self.run_cli("task", "import", "tasks")

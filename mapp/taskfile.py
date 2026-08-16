@@ -1,6 +1,5 @@
-"""解析与回写 MAPP 任务 markdown 文件。"""
+"""解析 MAPP 任务 Markdown 文本（stdin / import 用），返回字段字典。"""
 
-import os
 import re
 
 SECTION_RE = re.compile(r"^##\s+(.+?)\s*$")
@@ -24,16 +23,15 @@ def _split_sections(text):
     return sections
 
 
-def parse_task(path):
-    with open(path, encoding="utf-8") as fh:
-        text = fh.read()
+def parse_task(text):
+    """把任务 Markdown 文本解析为字段字典；缺失必填字段抛 ValueError。"""
     sec = _split_sections(text)
     missing = [k for k in ("ID", "Title", "Owner", "Goal", "Risk Level") if k not in sec]
     if missing:
-        raise ValueError(f"{path}: 缺少必要字段 {', '.join(missing)}")
+        raise ValueError(f"缺少必要字段: {', '.join(missing)}")
     risk = sec["Risk Level"].strip().upper()
     if risk not in ("L0", "L1", "L2", "L3"):
-        raise ValueError(f"{path}: Risk Level 非法 {risk!r}")
+        raise ValueError(f"Risk Level 非法: {risk!r}")
     qa_sec = sec.get("QA Required", "")
     return {
         "id": sec["ID"].strip(),
@@ -45,45 +43,46 @@ def parse_task(path):
         "qa_reason": qa_sec,
         "acceptance": sec.get("Acceptance Criteria", "").strip(),
         "context": sec.get("Context", "").strip(),
-        "deliverable": sec.get("Deliverable", "").strip(),
-        "file": os.path.abspath(path),
+        "deliverable_spec": sec.get("Deliverable", "").strip(),
     }
 
 
-def patch_review_result(path, result, failure_reason=None):
-    """回写任务文件的 Review Result / Failure Reason（由 PM 命令执行）。"""
-    with open(path, encoding="utf-8") as fh:
-        lines = fh.read().splitlines()
-
-    out = []
-    i = 0
-    replaced_result = False
-    replaced_reason = False
-    while i < len(lines):
-        m = SECTION_RE.match(lines[i])
-        if m and m.group(1).strip() == "Review Result":
-            out.append(lines[i])
-            i += 1
-            while i < len(lines) and not SECTION_RE.match(lines[i]):
-                i += 1
-            out.append(result)
-            replaced_result = True
-            continue
-        if m and m.group(1).strip() == "Failure Reason":
-            out.append(lines[i])
-            i += 1
-            while i < len(lines) and not SECTION_RE.match(lines[i]):
-                i += 1
-            out.append(failure_reason or "")
-            replaced_reason = True
-            continue
-        out.append(lines[i])
-        i += 1
-
-    if not replaced_result:
-        out.extend(["", "## Review Result", result])
-    if not replaced_reason:
-        out.extend(["", "## Failure Reason", failure_reason or ""])
-
-    with open(path, "w", encoding="utf-8") as fh:
-        fh.write("\n".join(out) + "\n")
+def render_task(task):
+    """从数据库字段生成任务 Markdown 文本（供 context / show 使用）。"""
+    lines = [
+        "# Task",
+        "",
+        "## ID",
+        task["id"],
+        "",
+        "## Title",
+        task["title"],
+        "",
+        "## Owner",
+        task["owner"],
+        "",
+        "## Goal",
+        task.get("goal") or "",
+        "",
+        "## Context",
+        task.get("context") or "",
+        "",
+        "## Risk Level",
+        task.get("risk_level") or "",
+        "",
+        "## QA Required",
+        task.get("qa_reason") or ("Yes" if task.get("qa_required") else "No"),
+        "",
+        "## Acceptance Criteria",
+        task.get("acceptance") or "",
+        "",
+        "## Deliverable",
+        task.get("deliverable_spec") or "",
+        "",
+        "## Review Result",
+        task.get("review_result") or "",
+        "",
+        "## Failure Reason",
+        task.get("failure_reason") or "",
+    ]
+    return "\n".join(lines)
