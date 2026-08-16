@@ -11,6 +11,7 @@
 | 职责与规范 | `protocols/contracts/` | 每个角色是谁、负责什么、如何规范 | PM 与各 Agent 身份职责、共享契约 |
 | 对象规格 | `protocols/specs/` | Feature / Task / PRD 及文档如何规范 | 对象字段、格式与文档标准 |
 | 协作流程 | `protocols/workflows/` | 项目如何运转 | PM 流程、Agent 通用流程、Agent 指挥目录 |
+| 机械执行 | `mapp/` | 状态机、门禁、审计与最小上下文注入 | 命令见 `mapp/README.md` |
 
 ---
 
@@ -20,15 +21,15 @@
 User Request → Product Requirement → Feature → Task → Deliverable
 ```
 
-| 对象 | 定义 | 负责人 | 位置 |
-|---|---|---|---|
-| Project | 整个软件项目 | PM Agent | PROJECT.md |
-| Product Requirement | 产品决策摘要 | Product Agent | requirements/ |
-| Feature | 长期产品能力 | PM Agent | features/ |
-| Task | 临时执行契约 | PM Agent | tasks/{Agent}/ |
-| Deliverable | 工作完成的证明 | 执行 Agent | Agents/{Agent}/deliverables/ |
-| Decision | 长期项目决策 | PM / 相关 Agent | decisions/ |
-| Release | 产品发布版本 | PM Agent | CHANGELOG.md |
+| 对象 | 定义 | 负责人 | 位置 | 权威来源 |
+|---|---|---|---|---|
+| Project | 整个软件项目 | PM Agent | PROJECT.md | 文件 |
+| Product Requirement | 产品决策摘要 | Product Agent | requirements/ | 文件（mapp 登记） |
+| Feature | 长期产品能力 | PM Agent | features/ | 文件 |
+| Task | 临时执行契约 | PM Agent | tasks/{Agent}/ | `.mapp/mapp.db`（INDEX.md 为生成视图） |
+| Deliverable | 工作完成的证明 | 执行 Agent | Agents/{Agent}/deliverables/ | 文件 + mapp 登记 |
+| Decision | 长期项目决策 | PM / 相关 Agent | decisions/ | 文件 |
+| Release | 产品发布版本 | PM Agent | CHANGELOG.md | 文件 |
 
 ---
 
@@ -42,29 +43,10 @@ User Request → Product Requirement → Feature → Task → Deliverable
 
 # 4. 阅读顺序
 
-只读取当前角色和当前任务所需的最小上下文，不通读无关文档。
+只读取当前角色和当前任务所需的最小上下文，不通读无关文档。任务相关上下文由 `mapp context <task-id>` 注入（Task 内容 + 引用输入），不自行扩大阅读范围。
 
-## PM
-
-1. `BASIC_MAPP.md`
-2. `contracts/PM.md`
-3. `contracts/Agent_Shared_Contract.md`
-4. `workflows/PM_Workflow.md`
-5. `PROJECT.md`
-6. `ACTIVE.md`
-7. 按需阅读其他文档。
-
-## Agent
-
-六个 Agent（Product / UI / Frontend / Backend / Mobile / QA）顺序相同，仅替换 `{Agent}`：
-
-1. `BASIC_MAPP.md`
-2. `contracts/{Agent}.md`
-3. `contracts/Agent_Shared_Contract.md`
-4. `workflows/Agent_Workflow.md`
-5. `Agents/{Agent}/PROJECT.md`
-6. `Agents/{Agent}/ACTIVE.md`
-7. 按需阅读其他文档。
+- PM：`BASIC_MAPP.md` → `contracts/PM.md` → `contracts/Agent_Shared_Contract.md` → `workflows/PM_Workflow.md` → `PROJECT.md` → `ACTIVE.md` → 按需其他文档。
+- Agent：`BASIC_MAPP.md` → `contracts/{Agent}.md` → `contracts/Agent_Shared_Contract.md` → `workflows/Agent_Workflow.md` → `Agents/{Agent}/PROJECT.md` → `Agents/{Agent}/ACTIVE.md` → 按需其他文档。
 
 ---
 
@@ -83,11 +65,11 @@ User Request → Product Requirement → Feature → Task → Deliverable
 
 # 6. 流程总览
 
-新项目：PM 判断初始化状态 → 建立项目骨架和四个核心文件 → 初始化 Product Agent 并产出 `DRAFT` PRD → PM 审核为 `APPROVED` → 明确产品形态与项目边界 → 按需初始化其他 Agent → 进入业务流程。
+新项目：PM 判断初始化状态 → 建立项目骨架和四个核心文件 → `mapp init` 初始化状态库 → 初始化 Product Agent 并产出 `DRAFT` PRD → PM 审核为 `APPROVED` → 明确产品形态与项目边界 → 按需初始化其他 Agent → 进入业务流程。
 
-已有项目：User Request → PM 初始化检查与需求分类 → 必要时取得 `APPROVED` PRD → 创建或更新 Feature → 创建 Task 并登记 → Agent 执行 → 验证并提交 Deliverable → PM 验收 → 状态收口。
+已有项目：User Request → PM 初始化检查与需求分类 → 必要时取得 `APPROVED` PRD → 创建或更新 Feature → `mapp task add` 创建 Task 并登记 → `mapp task assign` 派发 → Agent 经 `mapp context` 获取最小上下文并执行 → 验证并提交 Deliverable（`mapp task review`）→ PM 验收（`mapp task pass / fail`）→ 状态收口（`mapp status / audit`）。
 
-状态、权限和交付证据以 `specs/Task_Specification.md`、`workflows/PM_Workflow.md` 和 `workflows/Agent_Workflow.md` 为准；本 README 只做导航，不重复定义规则。
+状态、权限和交付证据以 `specs/Task_Specification.md`、`workflows/PM_Workflow.md`、`workflows/Agent_Workflow.md` 和 `mapp/README.md` 为准；本 README 只做导航，不重复定义规则。
 
 详细入口：
 

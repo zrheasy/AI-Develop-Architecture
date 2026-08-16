@@ -18,7 +18,7 @@ PM 按 `workflows/PM_Workflow.md` 的 Gate 顺序工作；本文件只保留 PM 
 
 ## 3. 状态机与不变量
 
-Task 只允许沿以下路径变化：
+Task 状态唯一权威是 `.mapp/mapp.db`，状态只允许沿以下路径变化，且只能通过 `mapp` 命令流转：
 
 ```text
 等待中 → 执行中 → 审核中 → 已完成
@@ -27,15 +27,15 @@ Task 只允许沿以下路径变化：
 审核失败：审核中 → 执行中
 ```
 
-验收失败时，PM 在 Task 中填写 `FAIL` 与 `Failure Reason`，将 `INDEX.md` 改为「执行中」；Agent 在自身 `ACTIVE.md` 中回到「执行中」，完成返工后再次提交「审核中」。
+验收失败时，PM 通过 `mapp task fail --reason ...` 填写 `FAIL` 与 `Failure Reason` 并将任务置为「执行中」；Agent 完成返工后再次通过 `mapp task review` 提交「审核中」。
 
-PM 必须维护 `INDEX.md` 中的状态；Agent 不得自行修改索引或 Task 状态。
+PM 必须通过 `mapp` 命令维护状态；Agent 不得自行修改索引、Task 文件或状态库。
 
 以下不变量始终成立：
 
 - 一个 Agent 一次只执行一个 Task；审核期间不派发下一个 Task。
 - 没有前置输入，不得进入「执行中」。
-- Agent 报告阻塞时，`INDEX.md` 改为「阻塞中」；阻塞解除后才可回到「执行中」。
+- Agent 报告阻塞时，PM 通过 `mapp task block` 置为「阻塞中」；阻塞解除后 `mapp task unblock` 才可回到「执行中」。
 - 没有 Deliverable 和验证证据，不得进入「已完成」。
 - PM 不因形式完整而跳过风险对应的 QA 判断。
 - 需求变化、范围扩大、跨领域修改、信息不足或决策冲突时，立即暂停并重新拆解或升级，不在原 Task 中自行处理。

@@ -17,10 +17,10 @@ Task 定义结果，不规定具体实现方式。
 
 `tasks/{Agent}/` 包含：
 
-- `INDEX.md`：任务索引，由 PM 维护任务状态、优先级和文件地址；
+- `INDEX.md`：任务索引，由 `mapp index` 从 `.mapp/mapp.db` 生成（状态、优先级、文件地址的展示视图）；
 - `TASK-XXX.md`：任务文件，由 PM 创建和维护。
 
-任务文件始终原地存放，状态只以 `INDEX.md` 为准，不随状态移动文件。
+任务文件始终原地存放，状态唯一权威是 `.mapp/mapp.db`，不随状态移动文件。
 
 ## 3. 状态机
 
@@ -31,6 +31,8 @@ Task 定义结果，不规定具体实现方式。
 审核失败：审核中 → 执行中
 ```
 
+状态唯一权威是 `.mapp/mapp.db`；状态流转只能通过 `mapp` 命令（`task add / assign / review / block / unblock / fail / pass`）执行，脚本强制校验转移与门禁。`INDEX.md` 是生成视图，由 `mapp index` 输出。
+
 | 状态 | 含义 | Agent 行为 |
 |---|---|---|
 | 等待中 | 任务已创建，但前置输入尚未完备 | 不读取、不执行 |
@@ -39,7 +41,7 @@ Task 定义结果，不规定具体实现方式。
 | 阻塞中 | 当前任务因输入、环境、权限或依赖无法继续 | 填写阻塞信息并等待 PM 解除；不得继续猜测或扩大范围 |
 | 已完成 | PM 已验收通过 | 不再执行；长期价值沉淀到 Feature 或 Decision |
 
-PM 在 `INDEX.md` 维护状态。Agent 不修改 `INDEX.md`，也不自行翻转任务状态。
+PM 通过 `mapp` 命令维护状态。Agent 不修改 `INDEX.md`，也不自行翻转任务状态。
 
 ## 4. 任务模板
 
@@ -105,17 +107,14 @@ QA Task 必须明确验证目标、排除范围、测试边界、所需证据以
 
 1. 分析需求：确认关联 Feature、Owner、风险等级和前置输入。
 2. 创建任务文件，填写目标、上下文、验收标准和交付要求。
-3. 在 `INDEX.md` 登记为「等待中」。
-4. 前置输入完备后，将任务翻转为「执行中」并通知 Owner Agent。
+3. 通过 `mapp task add` 登记为「等待中」并生成 `INDEX.md`。
+4. 前置输入完备后，通过 `mapp task assign` 翻转为「执行中」并通知 Owner Agent。
 
 前置输入不足时，PM 不得将任务翻转为「执行中」。
 
 ## 6. Agent 获取与执行
 
-Agent 通过自身 `ACTIVE.md` 中的固定指针读取 `INDEX.md`，只获取：
-
-- 「执行中」中优先级最高的一个任务；或
-- 当前 `ACTIVE.md` 指向的返工任务。
+Agent 通过 `mapp context <task-id>` 获取任务内容与引用输入（只获取 Task 文件声明的上下文），通过 `mapp task list --owner {Agent} --status 执行中` 确认当前任务。
 
 Agent 读取任务的 `Goal`、`Context`、`Acceptance Criteria` 和 `Deliverable` 后，自主决定实现方案、执行步骤与技术选择。
 
@@ -128,17 +127,17 @@ Agent 读取任务的 `Goal`、`Context`、`Acceptance Criteria` 和 `Deliverabl
 ### Agent
 
 1. 完成验收标准要求的结果和验证。
-2. 生成 Deliverable，并记录验证信息。
-3. 更新自身 `ACTIVE.md` 为「审核中」，附 Deliverable 地址。
+2. 按 `specs/Delivery_Standards.md` 生成 Deliverable，并记录验证信息。
+3. 通过 `mapp task review` 提交审核并登记交付物地址。
 4. 通知 PM 验收并等待结果。
 
-无法继续时，更新自身 `ACTIVE.md` 为「阻塞中」，写明阻塞原因、影响和所需处理，并通知 PM；不提交为完成。
+无法继续时，将阻塞原因、影响和所需处理通知 PM；PM 通过 `mapp task block` 置为「阻塞中」；不提交为完成。
 
 ### PM
 
-- 验收通过：将 `INDEX.md` 状态改为「已完成」，在 Task 中记录 `PASS`，通知 Agent 获取下一个任务。
-- 验收失败：在 Task 中记录 `FAIL` 和具体 `Failure Reason`，将 `INDEX.md` 改为「执行中」，通知原 Agent 返工。
-- 收到阻塞通知：将 `INDEX.md` 改为「阻塞中」；阻塞解除后改为「执行中」并通知 Agent。
+- 验收通过：通过 `mapp task pass` 置为「已完成」，自动记录 `PASS` 并回写任务文件，通知 Agent 获取下一个任务。
+- 验收失败：通过 `mapp task fail` 记录 `FAIL` 和具体 `Failure Reason`，置为「执行中」并回写任务文件，通知原 Agent 返工。
+- 收到阻塞通知：通过 `mapp task block` 置为「阻塞中」；阻塞解除后 `mapp task unblock` 置回「执行中」并通知 Agent。
 
 ## 8. 开发类 Task 的版本交付
 

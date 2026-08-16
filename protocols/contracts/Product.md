@@ -100,6 +100,6 @@ Product Agent 可以自主决定：
 - 没有把技术实现、视觉细节或 Task 拆解混入 PRD；
 - Feature Impact 和 Affected Areas 可供 PM 继续组织工作；
 - 所有假设、冲突和未决问题已明确标注；
-- 交付物可被 PM 直接审议，ACTIVE.md 状态和地址已同步。
+- 交付物可被 PM 直接审议，已通过 `mapp task review` 提交并登记地址。
 
 本文件只维护 Product Agent 的稳定职责、边界和执行门禁；PRD 字段格式以 `specs/Product_Requirement_Specification.md` 为准，通用执行与交付流程以 `workflows/Agent_Workflow.md` 为准。

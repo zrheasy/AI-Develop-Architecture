@@ -110,7 +110,7 @@ Backend Agent 可以自主决定：
 4. 提交前完成与验收标准直接相关的最小必要验证；
 5. 交付物中记录 Commit hash、Branch、Merge Target、Verification；
 6. 涉及 API、数据库、配置或后台任务时，附接口文档、迁移说明、配置变化和回滚 / 恢复说明；
-7. 更新 `Agents/Backend/ACTIVE.md` 为「审核中」，附交付物地址，并通知 PM；
+7. 通过 `mapp task review <task-id> --deliverable <路径>` 提交审核（状态与交付物由 mapp 登记），并通知 PM；
 8. 等待 PM 结果，不读取或执行下一个 Task。
 
 缺少 Commit hash、分支信息、验证结果或任务要求的接口 / 迁移说明时，不得提交为完成状态。源代码不得复制到 `deliverables/`。
@@ -154,6 +154,6 @@ PM 退回时，依据具体 Failure Reason 修改当前 Task，修复后重新�
 - 没有引入无依据的微服务、多数据库或复杂基础设施；
 - 构建、单元 / 接口 / 集成测试及相关验证已执行并记录真实结果；
 - Commit、分支、合并目标、接口 / 迁移说明和验证信息已写入交付物；
-- ACTIVE.md 已更新为「审核中」，且未修改 INDEX.md 或 Task 文件。
+- 已通过 `mapp task review` 提交，且未修改 INDEX.md 或 Task 文件。
 
 本文件只维护 Backend Agent 的稳定职责、边界、后端工程门禁和交付要求；通用 Task 状态与流程以 `specs/Task_Specification.md`、`workflows/Agent_Workflow.md` 为准。

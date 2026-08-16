@@ -42,12 +42,13 @@ PM 收到用户请求后，必须按以下顺序推进：
 1. 在项目根目录初始化 git（已存在则跳过），并确保项目级仓库使用 `main` 作为唯一长期分支；
 2. 建立 `README`、四个核心文件、`requirements/`、`features/`、`tasks/{Agent}/` 和 `decisions/` 骨架；Agent 工作空间由对应 Agent 通过初始化 Task 创建；
 3. 创建 `PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`、`CHANGELOG.md` 骨架；
-4. 初始化 Product Agent 工作空间并轻验收；
-5. 派发需求分析 Task，获得 DRAFT PRD；
-6. 审核 PRD：完整且方向明确 → 保存为 `requirements/PR-XXX.md` 并标记 `APPROVED`；否则退回补充；
-7. 基于 APPROVED PRD 明确 MVP 形态、演进路径和长期边界，记录到 `PROJECT.md` / `DECISIONS.md`；
-8. 按需初始化其他参与 Agent；
-9. 复核四个核心文件、PRD、Agent 工作空间和「等待确认」项，确认初始化完成。
+4. 运行 `mapp init` 初始化状态库（`.mapp/mapp.db`）；
+5. 初始化 Product Agent 工作空间并轻验收；
+6. 派发需求分析 Task，获得 DRAFT PRD；
+7. 审核 PRD：完整且方向明确 → 保存为 `requirements/PR-XXX.md` 并标记 `APPROVED`；否则退回补充；
+8. 基于 APPROVED PRD 明确 MVP 形态、演进路径和长期边界，记录到 `PROJECT.md` / `DECISIONS.md`；
+9. 按需初始化其他参与 Agent；
+10. 复核四个核心文件、PRD、Agent 工作空间和「等待确认」项，确认初始化完成。
 
 初始化期间只有初始化 Task、需求分析 Task 和轻验收可以执行。
 
@@ -101,8 +102,8 @@ PM 根据已批准的 PRD / Feature / 维护请求拆解 Task。每个 Task 必�
 
 1. 按 Agent 职责拆分，保持一个 Task 一个主要 Owner；
 2. 将 Task 写入 `tasks/{Agent}/TASK-XXX.md`；
-3. 在对应 `INDEX.md` 登记为「等待中」；
-4. 只有前置输入全部满足时，才可进入「执行中」。
+3. 通过 `mapp task add` 登记为「等待中」并生成 `INDEX.md`；
+4. 前置输入全部满足后，通过 `mapp task assign` 进入「执行中」。
 
 Task 不规定实现方式，只规定目标、输入、约束、验收和交付证明。详细模板以 `Task_Specification.md` 为准。
 
@@ -113,17 +114,17 @@ Task 不规定实现方式，只规定目标、输入、约束、验收和交付
 1. Agent 是否为职责对应的固定角色：Product、UI、Frontend、Backend、Mobile 或 QA；
 2. 工作空间是否存在；
 3. Agent 是否已启动且可复用；
-4. `ACTIVE.md` 是否状态真实、没有未处理的审核或阻塞；
+4. `mapp status --owner {Agent}` 显示状态真实、没有未处理的审核或阻塞；
 5. 首次业务任务是否已完成工作空间初始化并通过轻验收；
-6. 是否存在同一 Agent 的执行中任务；若存在，不得并行派发第二个任务。
+6. 是否存在同一 Agent 的执行中任务（mapp 自动校验）；若存在，不得并行派发第二个任务。
 
 Agent 不存在时按照系统的agent配置进行创建；已存在时复用，不通过重复创建同职责 Agent 规避状态确认。分配边界以 `workflows/Agent_Directory.md` 和对应 Agent contract 为准。
 
-派发通知只包含：Task 地址、Owner、前置依赖是否满足、启动后的状态和下一步。Task 已写明的信息不重复发送。
+派发通知只包含：Task 地址、Owner、前置依赖是否满足、启动后的状态和下一步。Task 已写明的信息不重复发送；Agent 通过 `mapp context <task-id>` 获取最小上下文。
 
 ## 8. Gate 6：执行监控与异常
 
-Task 状态由 PM 在 `INDEX.md` 维护，允许路径为：
+Task 状态由 `mapp` 在 `.mapp/mapp.db` 维护，允许路径为：
 
 ```text
 等待中 → 执行中 → 审核中 → 已完成
@@ -135,36 +136,34 @@ Task 状态由 PM 在 `INDEX.md` 维护，允许路径为：
 执行期间：
 
 - Agent 一次只执行一个 Task；PM 不在审核期间派发其下一个 Task；
-- Agent 只维护自身 `ACTIVE.md`，不修改 `INDEX.md` 或 Task 文件；
+- Agent 不修改 `INDEX.md`、Task 文件或状态库；状态流转只能通过 `mapp` 命令；
 - PM 关注输入是否满足、范围是否变化、阻塞是否真实，不介入专业实现过程；
 - 发现需求变化、跨域修改、决策冲突或输入不足时，暂停当前推进，重新拆解或升级；
-- Agent 报告阻塞时，将对应 `INDEX.md` 改为「阻塞中」；解除后改为「执行中」并通知 Agent；
+- Agent 报告阻塞时，通过 `mapp task block` 置为「阻塞中」；解除后 `mapp task unblock` 置回「执行中」并通知 Agent；
 - Agent 无法完成时，先判断是输入、环境、能力还是任务设计问题，再决定补充输入、调整 Task 或重新分配。
 
 ## 9. Gate 7：交付审核
 
-Agent 提交审核的入口是：自身 `ACTIVE.md` 为「审核中」，并附实际 Deliverable 地址。PM 收到通知后：
+Agent 提交审核的入口是 `mapp task review <task-id> --deliverable <实际路径>`，并通知 PM。PM 收到通知后：
 
-1. 将对应 `INDEX.md` 改为「审核中」；
+1. 确认 `mapp task show` 中任务状态为「审核中」且交付物地址已登记；
 2. 检查交付物地址可访问、结果覆盖 Acceptance Criteria、验证证据真实可复核；
 3. 按最小上下文审阅：只读取结论、验收标准与验证证据，不全文读取实现细节；接口 / 数据诊断只抽取验收相关字段；
 4. 检查是否越权、扩大范围或引入未批准决策；
-5. 开发类 Task 额外检查 Commit hash、Branch、Merge Target、Verification；
+5. 开发类 Task 额外检查 Commit hash、Branch、Merge Target、Verification（`mapp task pass` 会自动校验）；
 6. 根据 Risk Level 检查 QA 是否按 Task 要求完成，不以形式完整代替专业证据；
 
 ### 审核通过
 
-- Task 文件记录 `Review Result: PASS`；
-- `INDEX.md` 改为「已完成」；
-- 通知 Agent 更新自己的ACTIVE；
+- 通过 `mapp task pass` 置为「已完成」，自动回写 `Review Result: PASS`；
+- 通知 Agent 获取下一个任务；
 - 若产生长期价值，沉淀到 Feature 或 Decision。
 
 ### 审核失败
 
-- Task 文件记录 `Review Result: FAIL` 和具体 Failure Reason；
-- `INDEX.md` 改为「执行中」；
+- 通过 `mapp task fail --reason ...` 置为「执行中」，自动回写 `Review Result: FAIL` 与 Failure Reason；
 - 通知原 Agent 依据 Failure Reason 返工；
-- Agent 将自身 `ACTIVE.md` 改为「执行中」，完成后再次提交「审核中」；
+- Agent 完成后再次通过 `mapp task review` 提交「审核中」；
 - 不跳过当前任务、不直接关闭任务、不由 PM 代为修复。
 
 ## 10. QA 派发决策
@@ -191,7 +190,7 @@ QA 结论是 PM 验收的输入：`QA Required: Yes` 的 Task 没有 QA `PASS`�
 - `DECISIONS.md` 只记录已确认且未来仍有影响的决策；
 - Feature、PRD、Task 状态与实际交付一致；
 - `CHANGELOG.md` 只在版本发布时更新；
-- 没有悬空依赖、无 Owner Task、未处理的审核或未记录的阻塞；
+- 通过 `mapp status --all` 与 `mapp audit` 确认没有悬空依赖、无 Owner Task、未处理的审核或未记录的阻塞；
 - 下一步明确到具体 Agent、Task 或用户决策。
 
 禁止把核心文件写成工作日志、讨论记录、完整任务清单或技术实现文档。Git 已保存的实现细节不重复写入治理文件。
@@ -235,7 +234,7 @@ PM 可自主决定需求分类、Feature 是否创建、Task 拆分、Owner、�
 [ ] Feature 已创建 / 更新或明确不需要
 [ ] Task 字段、依赖、Owner、风险和验收标准完整
 [ ] Agent 已就绪，Task 已正确登记和派发
-[ ] 状态只按状态机变化
-[ ] Deliverable、验证证据和 QA 结论已检查
+[ ] 状态只按状态机变化（mapp 强制校验）
+[ ] Deliverable、验证证据和 QA 结论已检查（mapp task pass 门禁已过）
 [ ] 治理文件已收口，下一步明确
 ```

@@ -1,0 +1,93 @@
+"""SQLite 持久化：schema、连接与初始化。"""
+
+import os
+import sqlite3
+from datetime import datetime, timezone
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS agents (
+    name         TEXT PRIMARY KEY,
+    status       TEXT NOT NULL DEFAULT 'idle',
+    current_task TEXT,
+    updated_at   TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS tasks (
+    id            TEXT PRIMARY KEY,
+    title         TEXT NOT NULL,
+    owner         TEXT NOT NULL REFERENCES agents(name),
+    status        TEXT NOT NULL,
+    risk_level    TEXT NOT NULL,
+    qa_required   INTEGER NOT NULL DEFAULT 0,
+    qa_reason     TEXT NOT NULL DEFAULT '',
+    priority      TEXT NOT NULL DEFAULT 'P1',
+    file          TEXT NOT NULL,
+    deliverable   TEXT,
+    commit_hash   TEXT,
+    branch        TEXT,
+    merge_target  TEXT,
+    verification  TEXT,
+    review_result TEXT,
+    failure_reason TEXT,
+    created_at    TEXT NOT NULL,
+    updated_at    TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS task_events (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    task_id     TEXT NOT NULL REFERENCES tasks(id),
+    from_status TEXT,
+    to_status   TEXT NOT NULL,
+    actor       TEXT NOT NULL,
+    reason      TEXT,
+    created_at  TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS qa_results (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    task_id    TEXT NOT NULL REFERENCES tasks(id),
+    result     TEXT NOT NULL CHECK (result IN ('PASS','FAIL','BLOCKED')),
+    report     TEXT,
+    created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+CREATE INDEX IF NOT EXISTS idx_tasks_owner ON tasks(owner);
+CREATE INDEX IF NOT EXISTS idx_events_task ON task_events(task_id);
+"""
+
+
+def default_db_path(project_root):
+    return os.path.join(project_root, ".mapp", "mapp.db")
+
+
+def connect(path):
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
+    return conn
+
+
+def init_db(path):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    conn = connect(path)
+    try:
+        conn.executescript(SCHEMA)
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def now():
+    return datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%dT%H:%M:%S%z")
+
+
+def seed_agents(conn):
+    from mapp.state import AGENT_NAMES
+
+    for name in AGENT_NAMES:
+        conn.execute(
+            "INSERT OR IGNORE INTO agents(name, status, updated_at) VALUES (?, 'idle', ?)",
+            (name, now()),
+        )
+    conn.commit()

@@ -121,7 +121,7 @@ UI Agent 可以自主决定：
 - 优先复用已有组件和设计规范，新增规则已说明原因；
 - 没有混入技术实现、产品决策或测试结论；
 - Frontend / Mobile Agent 无需猜测关键行为、尺寸或状态；
-- 设计交付物地址、验证说明和 ACTIVE.md 状态已同步。
+- 设计交付物地址、验证说明已提交，已通过 `mapp task review` 登记地址。
 
 本文件只维护 UI Agent 的稳定职责、边界和设计门禁；具体 Task 字段和交付流程以 `specs/Task_Specification.md` 与 `workflows/Agent_Workflow.md` 为准。
 
