@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS agents (
     name         TEXT PRIMARY KEY,
-    status       TEXT NOT NULL DEFAULT 'idle',
+    status       TEXT NOT NULL DEFAULT 'IDLE',
     current_task TEXT,
     updated_at   TEXT NOT NULL
 );
@@ -168,7 +168,7 @@ def seed_agents(conn):
 
     for name in AGENT_NAMES:
         conn.execute(
-            "INSERT OR IGNORE INTO agents(name, status, updated_at) VALUES (?, 'idle', ?)",
+            "INSERT OR IGNORE INTO agents(name, status, updated_at) VALUES (?, 'IDLE', ?)",
             (name, now()),
         )
     conn.commit()

@@ -1,10 +1,10 @@
 """Task 状态机与不变量定义。"""
 
-WAITING = "waiting"
-EXECUTING = "executing"
-REVIEWING = "reviewing"
-BLOCKED = "blocked"
-DONE = "done"
+WAITING = "WAITING"
+EXECUTING = "EXECUTING"
+REVIEWING = "REVIEWING"
+BLOCKED = "BLOCKED"
+DONE = "DONE"
 
 ALL_STATUSES = (WAITING, EXECUTING, REVIEWING, BLOCKED, DONE)
 

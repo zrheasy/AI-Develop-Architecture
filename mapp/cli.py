@@ -71,7 +71,7 @@ def _agent_status(conn, owner, status, current_task):
 
 def _parse_status(value):
     for st, lab in STATUS_LABELS.items():
-        if value == st or value == lab:
+        if value.upper() == st or value == lab:
             return st
     raise SystemExit(f"未知状态: {value}")
 
@@ -153,7 +153,7 @@ def cmd_task_assign(args):
     if row["status"] != WAITING:
         raise SystemExit(f"{args.id} 当前为 {label(row['status'])}，只能从 等待中 派发")
     active = conn.execute(
-        "SELECT id FROM tasks WHERE owner = ? AND status IN ('executing', 'reviewing', 'blocked')",
+        "SELECT id FROM tasks WHERE owner = ? AND status IN ('EXECUTING', 'REVIEWING', 'BLOCKED')",
         (row["owner"],),
     ).fetchall()
     if active:
@@ -171,7 +171,7 @@ def cmd_task_assign(args):
     if missing:
         raise SystemExit(f"{args.id} 缺少前置字段 {', '.join(missing)}，不得进入执行中")
     _flip(conn, row, EXECUTING, args.actor, "PM 派发")
-    _agent_status(conn, row["owner"], "executing", args.id)
+    _agent_status(conn, row["owner"], "EXECUTING", args.id)
     conn.commit()
     conn.close()
     print(f"{args.id} → 执行中（{row['owner']}）")
@@ -186,7 +186,7 @@ def cmd_task_review(args):
     if not os.path.exists(dpath):
         raise SystemExit(f"交付物不存在: {dpath}")
     _flip(conn, row, REVIEWING, args.actor, f"提交审核: {dpath}", {"deliverable": dpath})
-    _agent_status(conn, row["owner"], "reviewing", args.id)
+    _agent_status(conn, row["owner"], "REVIEWING", args.id)
     conn.commit()
     conn.close()
     print(f"{args.id} → 审核中（交付物: {dpath}）")
@@ -200,7 +200,7 @@ def cmd_task_block(args):
     if not (args.reason or "").strip():
         raise SystemExit("--reason 必填")
     _flip(conn, row, BLOCKED, args.actor, args.reason)
-    _agent_status(conn, row["owner"], "blocked", args.id)
+    _agent_status(conn, row["owner"], "BLOCKED", args.id)
     conn.commit()
     conn.close()
     print(f"{args.id} → 阻塞中: {args.reason}")
@@ -212,7 +212,7 @@ def cmd_task_unblock(args):
     if row["status"] != BLOCKED:
         raise SystemExit(f"{args.id} 当前为 {label(row['status'])}，只有阻塞中任务可解除")
     _flip(conn, row, EXECUTING, args.actor, args.reason or "阻塞解除")
-    _agent_status(conn, row["owner"], "executing", args.id)
+    _agent_status(conn, row["owner"], "EXECUTING", args.id)
     conn.commit()
     conn.close()
     print(f"{args.id} → 执行中")
@@ -229,7 +229,7 @@ def cmd_task_fail(args):
         conn, row, EXECUTING, args.actor, args.reason,
         {"review_result": "FAIL", "failure_reason": args.reason},
     )
-    _agent_status(conn, row["owner"], "executing", args.id)
+    _agent_status(conn, row["owner"], "EXECUTING", args.id)
     conn.commit()
     conn.close()
     print(f"{args.id} → 执行中（FAIL）")
@@ -261,7 +261,7 @@ def cmd_task_pass(args):
         if missing:
             raise SystemExit(f"开发类 Task 缺少 {', '.join(missing)}，不得验收通过")
     _flip(conn, row, DONE, args.actor, "验收通过", {"review_result": "PASS"})
-    _agent_status(conn, row["owner"], "idle", None)
+    _agent_status(conn, row["owner"], "IDLE", None)
     conn.commit()
     conn.close()
     print(f"{args.id} → 已完成（PASS）")
@@ -292,7 +292,7 @@ def cmd_qa(args):
     )
     if result == "BLOCKED" and row["status"] in (EXECUTING, REVIEWING):
         _flip(conn, row, BLOCKED, "QA", "QA BLOCKED")
-        _agent_status(conn, row["owner"], "blocked", args.id)
+        _agent_status(conn, row["owner"], "BLOCKED", args.id)
     conn.commit()
     conn.close()
     print(f"{args.id} QA 结论已记录: {result}")
