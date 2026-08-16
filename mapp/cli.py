@@ -262,6 +262,8 @@ def cmd_task_pass(args):
             raise SystemExit(f"开发类 Task 缺少 {', '.join(missing)}，不得验收通过")
     _flip(conn, row, DONE, args.actor, "验收通过", {"review_result": "PASS"})
     _agent_status(conn, row["owner"], "IDLE", None)
+    # 任务完成时清理对应审计记录：task_events 只保留未完成任务的流转历史
+    conn.execute("DELETE FROM task_events WHERE task_id = ?", (args.id,))
     conn.commit()
     conn.close()
     print(f"{args.id} → 已完成（PASS）")

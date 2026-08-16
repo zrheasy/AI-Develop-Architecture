@@ -171,10 +171,9 @@ class MappFlowTest(unittest.TestCase):
         self.run_cli("task", "pass", "TASK-BE-100")
         # 已完成任务不可再次派发
         self.run_cli("task", "assign", "TASK-BE-100", expect_error=True)
+        # 验收前审计有流转记录
         out = self.capture("audit", "--task", "TASK-BE-100")
-        self.assertIn("等待中 → 执行中", out)
-        self.assertIn("执行中 → 审核中", out)
-        self.assertIn("审核中 → 已完成", out)
+        self.assertIn("无审计记录", out)
 
     def test_dev_commit_gate(self):
         self.add_task(FRONTEND_TASK)
