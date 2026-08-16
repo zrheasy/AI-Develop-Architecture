@@ -37,6 +37,9 @@ python -m mapp --project . init
 | `status [--owner O]` | 查看 Agent 与任务状态（替代逐个读 ACTIVE / INDEX） |
 | `audit [--task id] [--limit N]` | 状态流转审计 |
 | `context <id>` | 最小上下文注入：Task 内容 + 引用输入 |
+| `feature add/status/list/show/import` | Feature 入库管理（生命周期状态机强制） |
+| `prd add/status/list/show/import` | PRD 入库管理（DRAFT→APPROVED→ARCHIVED） |
+| `decision add/list/show/import` | Decision 入库管理 |
 
 ## 强制不变量
 
@@ -52,4 +55,5 @@ python -m mapp --project . init
 - 状态唯一权威：`.mapp/mapp.db`；任务列表通过 `mapp task list` 读取，不再生成 INDEX.md。
 - PM 通过 `mapp status --all` / `mapp audit` 监控，不逐个读取 Agent 的 ACTIVE.md。
 - Agent 通过 `mapp context <task-id>` 获取最小上下文，不自行阅读其他文档。
+- Feature / PRD / Decision 统一存于数据库；存量文件用对应 `import` 一次性导入后不再维护。
 - 规则与门禁定义见 `protocols/specs/Task_Specification.md`、`protocols/workflows/PM_Workflow.md`、`protocols/workflows/Agent_Workflow.md`。

@@ -48,7 +48,7 @@ PRD 必须符合 `specs/Product_Requirement_Specification.md`，至少包含：
 - Status：首次提交为 `DRAFT`；
 - Owner：Product Agent。
 
-Product Agent 只提交 PRD 草案和必要的产品分析交付物。PM 审核通过后，才将其保存为 `requirements/PR-XXX.md` 并标记 `APPROVED`；Product Agent 不自行将草案升级为批准状态。
+Product Agent 只提交 PRD 草案和必要的产品分析交付物（经 `mapp prd add` 入库）。PM 审核通过后，才通过 `mapp prd status` 标记 `APPROVED`；Product Agent 不自行将草案升级为批准状态。
 
 ## 5. 产品边界
 

@@ -12,17 +12,9 @@
 
 # 2. 结构
 
-`DECISIONS.md` 只作为索引，详细决策存放于 `decisions/`：
+`DECISIONS.md` 只作为索引；详细决策统一存于 `.mapp/mapp.db` 的 `decisions` 表，通过 `mapp decision` 命令管理（`add` 从 stdin 登记、`list` / `show` 查询、`import` 导入存量文件）。存量 `decisions/<topic>.md` 文件可用 `mapp decision import` 一次性导入后不再维护。
 
-```markdown
-# Decisions Index
-
-## <领域>
-相关决策说明。
-File: decisions/<topic>.md
-```
-
-决策文件格式：
+stdin 提交内容格式：
 
 ```markdown
 # Decision Topic
@@ -52,7 +44,7 @@ File: decisions/<topic>.md
 
 - 不保存历史，历史由 Git 保存。
 - 有长期价值保留，无价值删除，内容重复合并。
-- Agent 不读取所有 Decision：从索引找到相关领域，再读对应文件。
+- Agent 不读取所有 Decision：通过 `mapp decision list` 找到相关领域，再用 `mapp decision show <topic>` 读取。
 
 ---
 

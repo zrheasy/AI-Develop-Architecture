@@ -6,6 +6,7 @@ import sys
 
 from mapp import context as ctx_mod
 from mapp import db, taskfile
+from mapp import objects
 from mapp.state import (
     AGENT_NAMES,
     DEV_AGENTS,
@@ -386,8 +387,321 @@ def cmd_context(args):
     row = _get_task(conn, args.id)
     task = dict(row)
     task["owner"] = normalize_owner(row["owner"]) + " Agent"
-    print(ctx_mod.render_context(root, task))
+    print(ctx_mod.render_context(conn, root, task))
     conn.close()
+
+
+# ---------- Feature ----------
+
+FEATURE_STATUSES = ("PLANNING", "ACTIVE", "STABLE", "DEPRECATED", "ARCHIVED")
+
+
+def _insert_feature(conn, parsed, actor="PM"):
+    if conn.execute("SELECT 1 FROM features WHERE name = ?", (parsed["name"],)).fetchone():
+        raise SystemExit(f"Feature 已存在: {parsed['name']}")
+    now = db.now()
+    conn.execute(
+        "INSERT INTO features(name, title, goal, user_value, scope, status, owner, "
+        "related_decisions, evolution, created_at, updated_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (parsed["name"], parsed["title"], parsed["goal"], parsed["user_value"],
+         parsed["scope"], parsed["status"], parsed["owner"],
+         parsed["related_decisions"], parsed["evolution"], now, now),
+    )
+    conn.execute(
+        "INSERT INTO feature_events(feature, from_status, to_status, actor, reason, created_at) "
+        "VALUES (?, NULL, ?, ?, ?, ?)",
+        (parsed["name"], parsed["status"], actor, "创建 Feature", now),
+    )
+
+
+def cmd_feature_add(args):
+    conn, root = _get_conn(args)
+    text = sys.stdin.read()
+    if not text.strip():
+        raise SystemExit("stdin 为空：请通过管道粘贴 Feature Markdown")
+    parsed = objects.parse_feature(text, default_name=args.name)
+    _insert_feature(conn, parsed)
+    conn.commit()
+    conn.close()
+    print(f"已登记 Feature {parsed['name']}（{parsed['status']}）")
+
+
+def cmd_feature_status(args):
+    conn, root = _get_conn(args)
+    row = conn.execute("SELECT * FROM features WHERE name = ?", (args.name,)).fetchone()
+    if row is None:
+        raise SystemExit(f"Feature 不存在: {args.name}")
+    to_status = args.status.upper()
+    if to_status not in FEATURE_STATUSES:
+        raise SystemExit(f"状态非法: {to_status}")
+    if to_status not in objects.FEATURE_TRANSITIONS.get(row["status"], set()):
+        raise SystemExit(f"不允许 {row['status']} → {to_status}")
+    now = db.now()
+    conn.execute(
+        "INSERT INTO feature_events(feature, from_status, to_status, actor, reason, created_at) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (args.name, row["status"], to_status, "PM", args.reason or "状态变更", now),
+    )
+    conn.execute(
+        "UPDATE features SET status = ?, updated_at = ? WHERE name = ?",
+        (to_status, now, args.name),
+    )
+    conn.commit()
+    conn.close()
+    print(f"Feature {args.name}: {row['status']} → {to_status}")
+
+
+def cmd_feature_list(args):
+    conn, root = _get_conn(args)
+    sql = "SELECT name, title, status FROM features"
+    conds, params = [], []
+    if args.status:
+        conds.append("status = ?")
+        params.append(args.status.upper())
+    if conds:
+        sql += " WHERE " + " AND ".join(conds)
+    sql += " ORDER BY name"
+    rows = conn.execute(sql, params).fetchall()
+    if not rows:
+        print("无 Feature")
+    else:
+        print("| Name | Title | Status |")
+        print("|---|---|---|")
+        for r in rows:
+            print(f"| {r['name']} | {r['title']} | {r['status']} |")
+    conn.close()
+
+
+def cmd_feature_show(args):
+    conn, root = _get_conn(args)
+    row = conn.execute("SELECT * FROM features WHERE name = ?", (args.name,)).fetchone()
+    if row is None:
+        raise SystemExit(f"Feature 不存在: {args.name}")
+    print(objects.render_feature(dict(row)))
+    conn.close()
+
+
+def cmd_feature_import(args):
+    conn, root = _get_conn(args)
+    src = _resolve(root, args.dir)
+    if not os.path.isdir(src):
+        raise SystemExit(f"目录不存在: {src}")
+    added, skipped, failed = 0, 0, []
+    for name in sorted(os.listdir(src)):
+        if not name.endswith(".md"):
+            continue
+        path = os.path.join(src, name)
+        try:
+            with open(path, encoding="utf-8") as fh:
+                parsed = objects.parse_feature(fh.read(), default_name=name.removesuffix(".md"))
+            _insert_feature(conn, parsed, actor="IMPORT")
+            added += 1
+        except SystemExit:
+            skipped += 1
+        except ValueError as exc:
+            skipped += 1
+            failed.append(f"{name}: {exc}")
+    conn.commit()
+    conn.close()
+    print(f"Feature 导入完成: 新增 {added}，跳过 {skipped}")
+    for item in failed:
+        print(f"  - {item}")
+
+
+# ---------- PRD ----------
+
+PRD_STATUSES = ("DRAFT", "APPROVED", "ARCHIVED")
+
+
+def _insert_prd(conn, parsed, actor="PM"):
+    if conn.execute("SELECT 1 FROM prds WHERE id = ?", (parsed["id"],)).fetchone():
+        raise SystemExit(f"PRD 已存在: {parsed['id']}")
+    now = db.now()
+    conn.execute(
+        "INSERT INTO prds(id, title, user_need, goal, solution, scope, feature_impact, "
+        "affected_areas, acceptance, status, owner, created_at, updated_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (parsed["id"], parsed["title"], parsed["user_need"], parsed["goal"],
+         parsed["solution"], parsed["scope"], parsed["feature_impact"],
+         parsed["affected_areas"], parsed["acceptance"], parsed["status"],
+         parsed["owner"], now, now),
+    )
+    conn.execute(
+        "INSERT INTO prd_events(prd_id, from_status, to_status, actor, reason, created_at) "
+        "VALUES (?, NULL, ?, ?, ?, ?)",
+        (parsed["id"], parsed["status"], actor, "创建 PRD", now),
+    )
+
+
+def cmd_prd_add(args):
+    conn, root = _get_conn(args)
+    text = sys.stdin.read()
+    if not text.strip():
+        raise SystemExit("stdin 为空：请通过管道粘贴 PRD Markdown")
+    parsed = objects.parse_prd(text)
+    _insert_prd(conn, parsed)
+    conn.commit()
+    conn.close()
+    print(f"已登记 PRD {parsed['id']}（{parsed['status']}）")
+
+
+def cmd_prd_status(args):
+    conn, root = _get_conn(args)
+    row = conn.execute("SELECT * FROM prds WHERE id = ?", (args.id,)).fetchone()
+    if row is None:
+        raise SystemExit(f"PRD 不存在: {args.id}")
+    to_status = args.status.upper()
+    if to_status not in PRD_STATUSES:
+        raise SystemExit(f"状态非法: {to_status}")
+    if to_status not in objects.PRD_TRANSITIONS.get(row["status"], set()):
+        raise SystemExit(f"不允许 {row['status']} → {to_status}")
+    now = db.now()
+    conn.execute(
+        "INSERT INTO prd_events(prd_id, from_status, to_status, actor, reason, created_at) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (args.id, row["status"], to_status, "PM", args.reason or "状态变更", now),
+    )
+    conn.execute(
+        "UPDATE prds SET status = ?, updated_at = ? WHERE id = ?",
+        (to_status, now, args.id),
+    )
+    conn.commit()
+    conn.close()
+    print(f"PRD {args.id}: {row['status']} → {to_status}")
+
+
+def cmd_prd_list(args):
+    conn, root = _get_conn(args)
+    sql = "SELECT id, title, status FROM prds"
+    conds, params = [], []
+    if args.status:
+        conds.append("status = ?")
+        params.append(args.status.upper())
+    if conds:
+        sql += " WHERE " + " AND ".join(conds)
+    sql += " ORDER BY id"
+    rows = conn.execute(sql, params).fetchall()
+    if not rows:
+        print("无 PRD")
+    else:
+        print("| ID | Title | Status |")
+        print("|---|---|---|")
+        for r in rows:
+            print(f"| {r['id']} | {r['title']} | {r['status']} |")
+    conn.close()
+
+
+def cmd_prd_show(args):
+    conn, root = _get_conn(args)
+    row = conn.execute("SELECT * FROM prds WHERE id = ?", (args.id,)).fetchone()
+    if row is None:
+        raise SystemExit(f"PRD 不存在: {args.id}")
+    print(objects.render_prd(dict(row)))
+    conn.close()
+
+
+def cmd_prd_import(args):
+    conn, root = _get_conn(args)
+    src = _resolve(root, args.dir)
+    if not os.path.isdir(src):
+        raise SystemExit(f"目录不存在: {src}")
+    added, skipped, failed = 0, 0, []
+    for name in sorted(os.listdir(src)):
+        if not name.endswith(".md"):
+            continue
+        path = os.path.join(src, name)
+        try:
+            with open(path, encoding="utf-8") as fh:
+                parsed = objects.parse_prd(fh.read())
+            _insert_prd(conn, parsed, actor="IMPORT")
+            added += 1
+        except SystemExit:
+            skipped += 1
+        except ValueError as exc:
+            skipped += 1
+            failed.append(f"{name}: {exc}")
+    conn.commit()
+    conn.close()
+    print(f"PRD 导入完成: 新增 {added}，跳过 {skipped}")
+    for item in failed:
+        print(f"  - {item}")
+
+
+# ---------- Decision ----------
+
+
+def _insert_decision(conn, parsed, actor="PM"):
+    if conn.execute("SELECT 1 FROM decisions WHERE topic = ?", (parsed["topic"],)).fetchone():
+        raise SystemExit(f"Decision 已存在: {parsed['topic']}")
+    now = db.now()
+    conn.execute(
+        "INSERT INTO decisions(topic, title, context, decision, impact, created_at, updated_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (parsed["topic"], parsed["title"], parsed["context"], parsed["decision"],
+         parsed["impact"], now, now),
+    )
+
+
+def cmd_decision_add(args):
+    conn, root = _get_conn(args)
+    text = sys.stdin.read()
+    if not text.strip():
+        raise SystemExit("stdin 为空：请通过管道粘贴 Decision Markdown")
+    parsed = objects.parse_decision(text, default_topic=args.topic)
+    _insert_decision(conn, parsed)
+    conn.commit()
+    conn.close()
+    print(f"已登记 Decision {parsed['topic']}")
+
+
+def cmd_decision_list(args):
+    conn, root = _get_conn(args)
+    rows = conn.execute("SELECT topic, title FROM decisions ORDER BY topic").fetchall()
+    if not rows:
+        print("无 Decision")
+    else:
+        print("| Topic | Title |")
+        print("|---|---|")
+        for r in rows:
+            print(f"| {r['topic']} | {r['title']} |")
+    conn.close()
+
+
+def cmd_decision_show(args):
+    conn, root = _get_conn(args)
+    row = conn.execute("SELECT * FROM decisions WHERE topic = ?", (args.topic,)).fetchone()
+    if row is None:
+        raise SystemExit(f"Decision 不存在: {args.topic}")
+    print(objects.render_decision(dict(row)))
+    conn.close()
+
+
+def cmd_decision_import(args):
+    conn, root = _get_conn(args)
+    src = _resolve(root, args.dir)
+    if not os.path.isdir(src):
+        raise SystemExit(f"目录不存在: {src}")
+    added, skipped, failed = 0, 0, []
+    for name in sorted(os.listdir(src)):
+        if not name.endswith(".md"):
+            continue
+        path = os.path.join(src, name)
+        try:
+            with open(path, encoding="utf-8") as fh:
+                parsed = objects.parse_decision(fh.read(), default_topic=name.removesuffix(".md"))
+            _insert_decision(conn, parsed, actor="IMPORT")
+            added += 1
+        except SystemExit:
+            skipped += 1
+        except ValueError as exc:
+            skipped += 1
+            failed.append(f"{name}: {exc}")
+    conn.commit()
+    conn.close()
+    print(f"Decision 导入完成: 新增 {added}，跳过 {skipped}")
+    for item in failed:
+        print(f"  - {item}")
 
 
 def build_parser():
@@ -480,6 +794,59 @@ def build_parser():
     p = sub.add_parser("context", help="输出任务的最小上下文（Task + 引用输入）")
     p.add_argument("id")
     p.set_defaults(func=cmd_context)
+
+    feature = sub.add_parser("feature", help="Feature 管理（数据库存储）")
+    fsub = feature.add_subparsers(dest="feature_command", required=True)
+    p = fsub.add_parser("add", help="从 stdin 登记 Feature")
+    p.add_argument("--name", default=None, help="Feature 名（kebab-case）；缺省取 H1 标题转写")
+    p.set_defaults(func=cmd_feature_add)
+    p = fsub.add_parser("status", help="变更 Feature 生命周期状态")
+    p.add_argument("name")
+    p.add_argument("status", choices=["PLANNING", "ACTIVE", "STABLE", "DEPRECATED", "ARCHIVED"])
+    p.add_argument("--reason", default=None)
+    p.set_defaults(func=cmd_feature_status)
+    p = fsub.add_parser("list", help="列出 Feature")
+    p.add_argument("--status", default=None)
+    p.set_defaults(func=cmd_feature_list)
+    p = fsub.add_parser("show", help="查看 Feature 内容")
+    p.add_argument("name")
+    p.set_defaults(func=cmd_feature_show)
+    p = fsub.add_parser("import", help="从目录导入存量 Feature 文件")
+    p.add_argument("dir")
+    p.set_defaults(func=cmd_feature_import)
+
+    prd = sub.add_parser("prd", help="PRD 管理（数据库存储）")
+    psub = prd.add_subparsers(dest="prd_command", required=True)
+    p = psub.add_parser("add", help="从 stdin 登记 PRD")
+    p.set_defaults(func=cmd_prd_add)
+    p = psub.add_parser("status", help="变更 PRD 状态")
+    p.add_argument("id")
+    p.add_argument("status", choices=["DRAFT", "APPROVED", "ARCHIVED"])
+    p.add_argument("--reason", default=None)
+    p.set_defaults(func=cmd_prd_status)
+    p = psub.add_parser("list", help="列出 PRD")
+    p.add_argument("--status", default=None)
+    p.set_defaults(func=cmd_prd_list)
+    p = psub.add_parser("show", help="查看 PRD 内容")
+    p.add_argument("id")
+    p.set_defaults(func=cmd_prd_show)
+    p = psub.add_parser("import", help="从目录导入存量 PRD 文件")
+    p.add_argument("dir")
+    p.set_defaults(func=cmd_prd_import)
+
+    decision = sub.add_parser("decision", help="Decision 管理（数据库存储）")
+    dsub = decision.add_subparsers(dest="decision_command", required=True)
+    p = dsub.add_parser("add", help="从 stdin 登记 Decision")
+    p.add_argument("--topic", default=None, help="Decision topic（kebab-case）；缺省取 H1 标题转写")
+    p.set_defaults(func=cmd_decision_add)
+    p = dsub.add_parser("list", help="列出 Decision")
+    p.set_defaults(func=cmd_decision_list)
+    p = dsub.add_parser("show", help="查看 Decision 内容")
+    p.add_argument("topic")
+    p.set_defaults(func=cmd_decision_show)
+    p = dsub.add_parser("import", help="从目录导入存量 Decision 文件")
+    p.add_argument("dir")
+    p.set_defaults(func=cmd_decision_import)
 
     return parser
 

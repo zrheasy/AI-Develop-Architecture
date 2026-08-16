@@ -40,12 +40,12 @@ PM 收到用户请求后，必须按以下顺序推进：
 按以下顺序执行，未完成前不得创建业务 Feature 或业务 Task：
 
 1. 在项目根目录初始化 git（已存在则跳过），并确保项目级仓库使用 `main` 作为唯一长期分支；
-2. 建立 `README`、四个核心文件、`requirements/`、`features/`、`decisions/` 骨架；Agent 工作空间由对应 Agent 通过初始化 Task 创建；
+2. 建立 `README`、四个核心文件骨架；Agent 工作空间由对应 Agent 通过初始化 Task 创建；
 3. 创建 `PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`、`CHANGELOG.md` 骨架；
 4. 运行 `mapp init` 初始化状态库（`.mapp/mapp.db`）；
 5. 初始化 Product Agent 工作空间并轻验收；
 6. 派发需求分析 Task，获得 DRAFT PRD；
-7. 审核 PRD：完整且方向明确 → 保存为 `requirements/PR-XXX.md` 并标记 `APPROVED`；否则退回补充；
+7. 审核 PRD：完整且方向明确 → 通过 `mapp prd status` 标记 `APPROVED`；否则退回补充；
 8. 基于 APPROVED PRD 明确 MVP 形态、演进路径和长期边界，记录到 `PROJECT.md` / `DECISIONS.md`；
 9. 按需初始化其他参与 Agent；
 10. 复核四个核心文件、PRD、Agent 工作空间和「等待确认」项，确认初始化完成。
@@ -71,7 +71,7 @@ PM 收到用户请求后，必须按以下顺序推进：
 1. PM 创建 Product Agent Task，提供最小必要背景和决策问题；
 2. Product Agent 只提交 `DRAFT` PRD，包含 `User Need`、`Goal`、`Solution`、`Scope`、`Feature Impact`、`Affected Areas` 和产品 `Acceptance Criteria`；
 3. PM 检查用户价值、范围、排除项、Feature 影响、职责领域和验收标准；
-4. 通过则将 PRD 保存到 `requirements/PR-XXX.md` 并改为 `APPROVED`；不通过则写明 Failure Reason，退回原任务；
+4. 通过则通过 `mapp prd status <id> APPROVED` 标记；不通过则写明 Failure Reason，退回原任务；
 5. 未 APPROVED 的 PRD 不得创建业务 Feature 或执行业务拆解。
 
 PRD 只回答为什么做、做什么、影响什么；不得把 API、数据库、代码方案或 Task 执行状态写入 PRD。
@@ -80,7 +80,7 @@ PRD 只回答为什么做、做什么、影响什么；不得把 API、数据库
 
 当请求形成可长期管理的用户能力时，PM 创建或更新 Feature：
 
-- 新能力：创建 `features/<name>.md`，初始状态为 `PLANNING`；
+- 新能力：通过 `mapp feature add` 登记，初始状态为 `PLANNING`；
 - 已有能力增强：更新已有 Feature 的 Scope、User Value、Evolution 或 Related Tasks；
 - 技术优化、Bug、一次性工作：不创建 Feature；
 - Feature 只描述长期能力、用户价值、范围、生命周期和演进方向，不记录实现细节、Task 日志或 Bug 明细。

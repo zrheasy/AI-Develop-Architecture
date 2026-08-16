@@ -50,3 +50,42 @@ class ContextTest(unittest.TestCase):
         self.add_task(text)
         out = self.capture("context", "TASK-BE-100")
         self.assertIn("引用（未找到）: decisions/nonexistent.md", out)
+
+    def test_context_resolves_db_feature_ref(self):
+        """Context 的 Feature: 行从数据库解析，不依赖文件系统。"""
+        os.makedirs(os.path.join(self.root, "features"), exist_ok=True)
+        # 通过 stdin 直接登记 Feature 到数据库
+        feature_text = """# Daily Events Digest
+
+## Goal
+每天输出 3~5 个中文 AI 大事件。
+
+## User Value
+用户每天 3 分钟掌握重要进展。
+
+## Scope
+Included:
+- 每日抓取与筛选
+
+Excluded:
+- 本周趋势
+
+## Status
+PLANNING
+
+## Owner
+PM Agent
+"""
+        old_stdin = sys.stdin
+        sys.stdin = io.StringIO(feature_text)
+        try:
+            main(["--project", self.root, "feature", "add"])
+        finally:
+            sys.stdin = old_stdin
+        task_text = BACKEND_TASK.replace(
+            "- decisions/llm-provider.md", "Feature: daily-events-digest"
+        )
+        self.add_task(task_text)
+        out = self.capture("context", "TASK-BE-100")
+        self.assertIn("## 引用: daily-events-digest（数据库）", out)
+        self.assertIn("每天输出 3~5 个中文 AI 大事件", out)

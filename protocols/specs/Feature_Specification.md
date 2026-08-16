@@ -92,9 +92,11 @@ Future:
 - 错误创建、重复创建或无实际产品意义的 Feature 可以删除；
 - 当两个 Feature 的用户价值高度重叠、管理边界不清且没有独立生命周期时，可以合并。
 
-## 8. 文件与内容规范
+## 8. 存储与内容规范
 
-文件：`features/<name>.md`。
+Feature 统一存于 `.mapp/mapp.db` 的 `features` 表，通过 `mapp feature` 命令管理（`add` 从 stdin 登记、`status` 变更生命周期、`list` / `show` 查询、`import` 导入存量文件）。存量 `features/<name>.md` 文件可用 `mapp feature import` 一次性导入后不再维护。
+
+stdin 提交内容格式：
 
 ```markdown
 # Feature Name

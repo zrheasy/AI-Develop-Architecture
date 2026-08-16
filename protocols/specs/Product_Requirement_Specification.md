@@ -62,14 +62,14 @@ Product Agent
 
 ## 3. Product Agent 与 PM 流程
 
-1. Product Agent 分析用户需求，创建 `DRAFT` PR。
+1. Product Agent 分析用户需求，通过 `mapp prd add` 从 stdin 提交 `DRAFT` PR。
 2. PM 检查用户价值、产品方案、范围、Feature 影响、受影响领域和验收标准。
-3. 信息完整且方向明确时，PM 将 PR 标记为 `APPROVED` 并保存至 `requirements/PR-XXX.md`；否则退回补充。
-4. PM 根据已批准的 PR 创建或更新 Feature，并按 `Affected Areas` 拆解 Task。
+3. 信息完整且方向明确时，PM 通过 `mapp prd status <id> APPROVED` 标记为 `APPROVED`；否则退回补充。
+4. PM 根据已批准的 PR 通过 `mapp feature add / status` 创建或更新 Feature，并按 `Affected Areas` 拆解 Task。
 5. Task 的交付和验收依据 PR 的产品验收标准执行；PR 本身不记录 Task 执行状态。
 
 ## 4. 存储与保留
 
-Product Agent 交付后，PR 先以 `DRAFT` 状态存在；PM 审核通过后保存至 `requirements/PR-XXX.md`。
+PR 统一存于 `.mapp/mapp.db` 的 `prds` 表，通过 `mapp prd` 命令管理。Product Agent 交付后先以 `DRAFT` 状态存在；PM 审核通过后通过 `mapp prd status` 标记为 `APPROVED`。
 
-已批准的 PR 默认保留。当 PR 已被新决策取代，或仅包含一次性、临时调整且不再影响未来工作时，可以标记为 `ARCHIVED`。
+已批准的 PR 默认保留。当 PR 已被新决策取代，或仅包含一次性、临时调整且不再影响未来工作时，通过 `mapp prd status <id> ARCHIVED` 标记为 `ARCHIVED`。
