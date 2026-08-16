@@ -129,13 +129,13 @@ class MappFlowTest(unittest.TestCase):
             fh.write("# 交付说明\n\n## 结论\n验收标准全部满足。\n")
         return os.path.relpath(path, self.root)
 
-    def test_add_and_index(self):
+    def test_add_lists_from_db(self):
         self.run_cli("task", "add", "tasks/Backend/TASK-BE-100.md")
-        index_path = os.path.join(self.root, "tasks", "Backend", "INDEX.md")
-        self.assertTrue(os.path.exists(index_path))
-        content = open(index_path, encoding="utf-8").read()
-        self.assertIn("TASK-BE-100", content)
-        self.assertIn("等待中", content)
+        out = self.capture("task", "list", "--owner", "Backend")
+        self.assertIn("TASK-BE-100", out)
+        self.assertIn("等待中", out)
+        # INDEX.md 不再生成
+        self.assertFalse(os.path.exists(os.path.join(self.root, "tasks", "Backend", "INDEX.md")))
 
     def test_assign_requires_complete_fields(self):
         text = open(self.be_file, encoding="utf-8").read()

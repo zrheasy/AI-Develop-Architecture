@@ -34,7 +34,7 @@
 任务状态为「审核中」时由 `mapp task review` 登记交付物地址；此处只做引用说明，状态以 `.mapp/mapp.db` 为准。
 
 ## Task Index
-由 `mapp index` 生成，固定指针：tasks/{Agent}/INDEX.md（PM 维护，Agent 不修改）。
+任务列表与状态通过 `mapp task list --owner {Agent}` / `mapp status` 读取，不再维护 INDEX.md。
 
 ## Related Context
 Feature / Task / Decision 引用。

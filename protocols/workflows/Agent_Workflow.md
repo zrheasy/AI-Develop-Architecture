@@ -128,7 +128,7 @@ Agent 必须按 Task 的 Risk Level、Acceptance Criteria 和自身 contract 完
 1. 按 `specs/Delivery_Standards.md` 生成交付说明，记录结果、验证信息、已知限制和后续事项；
 2. 开发类 Task 记录 Commit hash、Branch、Merge Target、Verification；
 3. 非开发类 Task 按领域 contract 记录对应交付证明；
-4. 确认没有修改 `INDEX.md`、Task 文件或其他 Agent 工作空间；
+4. 确认没有修改 Task 文件或其他 Agent 工作空间；
 5. 通过 `mapp task review <task-id> --deliverable <实际路径>` 提交审核（自动翻转状态并登记交付物）；
 6. 按共享契约通知 PM：
 
@@ -159,7 +159,7 @@ PM 维护的 Task 状态由 PM 负责，Agent 不修改、不跳过、不关闭�
 
 ## 10. 状态同步规则
 
-任务状态唯一权威是 `.mapp/mapp.db`，由 `mapp` 命令维护；`INDEX.md` 由 `mapp index` 生成，Agent 不手工修改。
+任务状态唯一权威是 `.mapp/mapp.db`，由 `mapp` 命令维护；任务列表通过 `mapp task list` 读取，Agent 不自行改状态。
 
 Agent 只维护自身 `ACTIVE.md`（领域目标、下一步与阻塞说明）和在自身工作空间内产生的长期领域资产：
 
@@ -236,6 +236,6 @@ dev → feature/<feature-slug> → dev → main
 [ ] 结果与验证证据真实可复核
 [ ] Deliverable 已生成且可被后续工作继续使用
 [ ] 已通过 mapp task review 提交并附交付物地址
-[ ] 未修改 INDEX.md 或 Task 文件
+[ ] 未修改 Task 文件
 [ ] 已通知 PM，并等待审核
 ```

@@ -26,7 +26,7 @@ User Request → Product Requirement → Feature → Task → Deliverable
 | Project | 整个软件项目 | PM Agent | PROJECT.md | 文件 |
 | Product Requirement | 产品决策摘要 | Product Agent | requirements/ | 文件（mapp 登记） |
 | Feature | 长期产品能力 | PM Agent | features/ | 文件 |
-| Task | 临时执行契约 | PM Agent | tasks/{Agent}/ | `.mapp/mapp.db`（INDEX.md 为生成视图） |
+| Task | 临时执行契约 | PM Agent | tasks/{Agent}/ | `.mapp/mapp.db`（`mapp task list` 读取） |
 | Deliverable | 工作完成的证明 | 执行 Agent | Agents/{Agent}/deliverables/ | 文件 + mapp 登记 |
 | Decision | 长期项目决策 | PM / 相关 Agent | decisions/ | 文件 |
 | Release | 产品发布版本 | PM Agent | CHANGELOG.md | 文件 |

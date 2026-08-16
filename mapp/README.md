@@ -23,7 +23,7 @@ python -m mapp --project . init
 | 命令 | 作用 |
 |---|---|
 | `init` | 初始化数据库 |
-| `task add <file> [--priority P]` | 登记任务为「等待中」，生成 INDEX.md |
+| `task add <file> [--priority P]` | 登记任务为「等待中」 |
 | `task assign <id>` | 等待中→执行中（校验前置字段与并行不变量） |
 | `task review <id> --deliverable <path>` | 执行中→审核中（Agent 提交入口） |
 | `task block <id> --reason ...` | 执行中→阻塞中 |
@@ -36,7 +36,6 @@ python -m mapp --project . init
 | `status [--owner O]` | 查看 Agent 与任务状态（替代逐个读 ACTIVE / INDEX） |
 | `audit [--task id] [--limit N]` | 状态流转审计 |
 | `context <id>` | 最小上下文注入：Task 内容 + 引用输入 |
-| `index [--owner O]` | 从数据库生成 INDEX.md |
 
 ## 强制不变量
 
@@ -49,7 +48,7 @@ python -m mapp --project . init
 
 ## 协议衔接
 
-- 状态唯一权威：`.mapp/mapp.db`；`INDEX.md` 是生成视图（`mapp index`）。
+- 状态唯一权威：`.mapp/mapp.db`；任务列表通过 `mapp task list` 读取，不再生成 INDEX.md。
 - PM 通过 `mapp status --all` / `mapp audit` 监控，不逐个读取 Agent 的 ACTIVE.md。
 - Agent 通过 `mapp context <task-id>` 获取最小上下文，不自行阅读其他文档。
 - 规则与门禁定义见 `protocols/specs/Task_Specification.md`、`protocols/workflows/PM_Workflow.md`、`protocols/workflows/Agent_Workflow.md`。

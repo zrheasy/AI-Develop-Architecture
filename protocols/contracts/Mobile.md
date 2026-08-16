@@ -147,6 +147,6 @@ PM 退回时，依据具体 Failure Reason 修改当前 Task，修复后重新�
 - 没有阻塞主线程、引入明显资源泄漏或复制重复实现；
 - 构建、安装 / 运行和相关测试已执行并记录真实结果；
 - Commit、分支、合并目标、产物地址和验证信息已写入交付物；
-- 已通过 `mapp task review` 提交，且未修改 INDEX.md 或 Task 文件。
+- 已通过 `mapp task review` 提交，且未修改 Task 文件。
 
 本文件只维护 Mobile Agent 的稳定职责、边界、移动端工程门禁和交付要求；通用 Task 状态与流程以 `specs/Task_Specification.md`、`workflows/Agent_Workflow.md` 为准。

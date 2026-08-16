@@ -15,10 +15,7 @@ Task 定义结果，不规定具体实现方式。
 
 ## 2. 存储结构
 
-`tasks/{Agent}/` 包含：
-
-- `INDEX.md`：任务索引，由 `mapp index` 从 `.mapp/mapp.db` 生成（状态、优先级、文件地址的展示视图）；
-- `TASK-XXX.md`：任务文件，由 PM 创建和维护。
+`tasks/{Agent}/` 包含 `TASK-XXX.md` 任务文件，由 PM 创建和维护。任务状态、优先级与文件地址存于 `.mapp/mapp.db`，通过 `mapp task list --owner {Agent}` / `mapp task show <id>` 读取，不再生成 INDEX.md。
 
 任务文件始终原地存放，状态唯一权威是 `.mapp/mapp.db`，不随状态移动文件。
 
@@ -31,7 +28,7 @@ Task 定义结果，不规定具体实现方式。
 审核失败：审核中 → 执行中
 ```
 
-状态唯一权威是 `.mapp/mapp.db`；状态流转只能通过 `mapp` 命令（`task add / assign / review / block / unblock / fail / pass`）执行，脚本强制校验转移与门禁。`INDEX.md` 是生成视图，由 `mapp index` 输出。
+状态唯一权威是 `.mapp/mapp.db`；状态流转只能通过 `mapp` 命令（`task add / assign / review / block / unblock / fail / pass`）执行，脚本强制校验转移与门禁。任务列表与详情通过 `mapp task list` / `mapp task show` 读取。
 
 | 状态 | 含义 | Agent 行为 |
 |---|---|---|
@@ -41,7 +38,7 @@ Task 定义结果，不规定具体实现方式。
 | 阻塞中 | 当前任务因输入、环境、权限或依赖无法继续 | 填写阻塞信息并等待 PM 解除；不得继续猜测或扩大范围 |
 | 已完成 | PM 已验收通过 | 不再执行；长期价值沉淀到 Feature 或 Decision |
 
-PM 通过 `mapp` 命令维护状态。Agent 不修改 `INDEX.md`，也不自行翻转任务状态。
+PM 通过 `mapp` 命令维护状态。Agent 不修改 Task 文件，也不自行翻转任务状态。
 
 ## 4. 任务模板
 
@@ -107,7 +104,7 @@ QA Task 必须明确验证目标、排除范围、测试边界、所需证据以
 
 1. 分析需求：确认关联 Feature、Owner、风险等级和前置输入。
 2. 创建任务文件，填写目标、上下文、验收标准和交付要求。
-3. 通过 `mapp task add` 登记为「等待中」并生成 `INDEX.md`。
+3. 通过 `mapp task add` 登记为「等待中」。
 4. 前置输入完备后，通过 `mapp task assign` 翻转为「执行中」并通知 Owner Agent。
 
 前置输入不足时，PM 不得将任务翻转为「执行中」。

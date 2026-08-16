@@ -102,7 +102,7 @@ PM 根据已批准的 PRD / Feature / 维护请求拆解 Task。每个 Task 必�
 
 1. 按 Agent 职责拆分，保持一个 Task 一个主要 Owner；
 2. 将 Task 写入 `tasks/{Agent}/TASK-XXX.md`；
-3. 通过 `mapp task add` 登记为「等待中」并生成 `INDEX.md`；
+3. 通过 `mapp task add` 登记为「等待中」；
 4. 前置输入全部满足后，通过 `mapp task assign` 进入「执行中」。
 
 Task 不规定实现方式，只规定目标、输入、约束、验收和交付证明。详细模板以 `Task_Specification.md` 为准。
@@ -136,7 +136,7 @@ Task 状态由 `mapp` 在 `.mapp/mapp.db` 维护，允许路径为：
 执行期间：
 
 - Agent 一次只执行一个 Task；PM 不在审核期间派发其下一个 Task；
-- Agent 不修改 `INDEX.md`、Task 文件或状态库；状态流转只能通过 `mapp` 命令；
+- Agent 不修改 Task 文件或状态库；状态流转只能通过 `mapp` 命令；
 - PM 关注输入是否满足、范围是否变化、阻塞是否真实，不介入专业实现过程；
 - 发现需求变化、跨域修改、决策冲突或输入不足时，暂停当前推进，重新拆解或升级；
 - Agent 报告阻塞时，通过 `mapp task block` 置为「阻塞中」；解除后 `mapp task unblock` 置回「执行中」并通知 Agent；

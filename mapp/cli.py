@@ -4,7 +4,7 @@ import argparse
 import os
 
 from mapp import context as ctx_mod
-from mapp import db, index, taskfile
+from mapp import db, taskfile
 from mapp.state import (
     AGENT_NAMES,
     DEV_AGENTS,
@@ -113,9 +113,8 @@ def cmd_task_add(args):
     )
     _record(conn, parsed["id"], None, WAITING, "PM", "创建任务")
     conn.commit()
-    idx = index.write_index(conn, owner, root)
     conn.close()
-    print(f"已登记 {parsed['id']}（等待中）→ {os.path.relpath(idx, root)}")
+    print(f"已登记 {parsed['id']}（等待中），可用 `mapp task list --owner {owner}` 查看")
 
 
 def cmd_task_assign(args):
@@ -368,15 +367,6 @@ def cmd_context(args):
     conn.close()
 
 
-def cmd_index(args):
-    conn, root = _get_conn(args)
-    owners = [normalize_owner(args.owner)] if args.owner else list(AGENT_NAMES)
-    for owner in owners:
-        path = index.write_index(conn, owner, root)
-        print(os.path.relpath(path, root))
-    conn.close()
-
-
 def build_parser():
     parser = argparse.ArgumentParser(
         prog="mapp",
@@ -464,10 +454,6 @@ def build_parser():
     p = sub.add_parser("context", help="输出任务的最小上下文（Task + 引用输入）")
     p.add_argument("id")
     p.set_defaults(func=cmd_context)
-
-    p = sub.add_parser("index", help="从数据库生成各 Agent 的 INDEX.md")
-    p.add_argument("--owner", default=None)
-    p.set_defaults(func=cmd_index)
 
     return parser
 
