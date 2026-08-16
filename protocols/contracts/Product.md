@@ -91,7 +91,7 @@ Product Agent 可以自主决定：
 
 ## 7. 交付补充
 
-交付物必须包含 PRD 草案、范围、影响、未决问题和验证方式；通用提交、返工和状态要求以 `workflows/Agent_Workflow.md` 为准。PM 通过后，产品长期价值再沉淀到项目级 PR、Feature 或 Decision。
+交付物必须包含 PRD 草案、范围、影响、未决问题和验证方式；交付说明的结构、限长与内容边界以 `specs/Delivery_Standards.md` 为准；通用提交、返工和状态要求以 `workflows/Agent_Workflow.md` 为准。PM 通过后，产品长期价值再沉淀到项目级 PR、Feature 或 Decision。
 
 ## 8. 产品自检
 

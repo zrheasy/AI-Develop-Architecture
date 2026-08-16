@@ -129,7 +129,7 @@ Agent 必须按 Task 的 Risk Level、Acceptance Criteria 和自身 contract 完
 
 提交审核前必须完成：
 
-1. 生成实际 Deliverable，记录结果、范围、状态、验证信息、限制和后续说明；
+1. 按 `specs/Delivery_Standards.md` 生成交付说明，记录结果、验证信息、已知限制和后续事项；
 2. 开发类 Task 记录 Commit hash、Branch、Merge Target、Verification；
 3. 非开发类 Task 按领域 contract 记录对应交付证明；
 4. 确认没有修改 `INDEX.md`、Task 文件或其他 Agent 工作空间；

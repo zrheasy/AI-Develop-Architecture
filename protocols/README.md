@@ -76,6 +76,7 @@ User Request → Product Requirement → Feature → Task → Deliverable
 | 维护核心文件 | `specs/Project_Documentation_Standards.md`、`specs/Active_Documentation_Standards.md`、`specs/Decisions_Documentation_Standards.md` |
 | 做重要决策 | `DECISIONS.md`|
 | PM 分配 Agent | `workflows/Agent_Directory.md` |
+| 交付说明格式与验收 | `specs/Delivery_Standards.md` |
 | 发布记录 | `CHANGELOG.md` |
 
 ---

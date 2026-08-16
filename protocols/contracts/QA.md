@@ -110,7 +110,7 @@ QA 可以自主决定：
 
 ## 8. 交付补充
 
-交付物必须包含测试报告、质量结论、可复核证据和必要的缺陷报告；通用提交、返工和状态要求以 `workflows/Agent_Workflow.md` 为准。QA 发现的实现问题由对应 Owner Agent 修复，修复后由 PM 决定是否重新派发 QA 回归。
+交付物必须包含测试报告、质量结论、可复核证据和必要的缺陷报告；交付说明的结构、限长与内容边界以 `specs/Delivery_Standards.md` 为准；通用提交、返工和状态要求以 `workflows/Agent_Workflow.md` 为准。QA 发现的实现问题由对应 Owner Agent 修复，修复后由 PM 决定是否重新派发 QA 回归。
 
 ## 9. QA 自检
 

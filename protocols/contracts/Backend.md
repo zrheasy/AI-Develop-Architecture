@@ -132,7 +132,7 @@ Backend Agent 可以自主决定：
 
 ## 9. 交付物要求
 
-交付物必须让 PM 和后续 Agent 能继续工作，至少包含：
+交付说明按 `specs/Delivery_Standards.md` 生成，结构、限长与内容边界以该文件为准；交付物必须让 PM 和后续 Agent 能继续工作，至少包含：
 
 - 实现结果与变更范围；
 - Commit hash、Branch、Merge Target；

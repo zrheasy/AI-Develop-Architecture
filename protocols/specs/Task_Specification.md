@@ -89,7 +89,7 @@ PASS / FAIL
 - `Risk Level`：标记任务风险等级，用于决定验证深度。
 - `QA Required`：说明是否需要 QA 参与，并记录判断理由。
 - `Acceptance Criteria`：必须可检查，不使用“适当”“完整”等无法判断的表述。
-- `Deliverable`：记录可直接访问的实际交付物地址，不得只写抽象类型。
+- `Deliverable`：记录可直接访问的实际交付物地址，不得只写抽象类型。交付说明的结构、限长与内容边界以 `specs/Delivery_Standards.md` 为准。
 - `Review Result`：由 PM 在验收后填写；未验收时留空。
 - `Failure Reason`：仅在验收失败时填写具体原因。
 

@@ -112,7 +112,7 @@ UI Agent 可以自主决定：
 
 ## 8. 交付补充
 
-交付物必须包含设计方案、交互说明、状态定义、实现指引、实际检查范围和未决问题；通用提交、返工和状态要求以 `workflows/Agent_Workflow.md` 为准。PM 通过后，长期有效的设计规则沉淀到 `workspace/`、Feature 或 Decision。
+交付物必须包含设计方案、交互说明、状态定义、实现指引、实际检查范围和未决问题；交付说明的结构、限长与内容边界以 `specs/Delivery_Standards.md` 为准；通用提交、返工和状态要求以 `workflows/Agent_Workflow.md` 为准。PM 通过后，长期有效的设计规则沉淀到 `workspace/`、Feature 或 Decision。
 
 ## 9. UI 自检
 
