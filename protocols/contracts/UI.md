@@ -123,7 +123,7 @@ UI Agent 可以自主决定：
 - Frontend / Mobile Agent 无需猜测关键行为、尺寸或状态；
 - 设计交付物地址、验证说明和 ACTIVE.md 状态已同步。
 
-本文件只维护 UI Agent 的稳定职责、边界和设计门禁；具体 Task 字段和交付流程以 `contracts/specs/Task_Specification.md` 与 `workflows/Agent_Workflow.md` 为准。
+本文件只维护 UI Agent 的稳定职责、边界和设计门禁；具体 Task 字段和交付流程以 `specs/Task_Specification.md` 与 `workflows/Agent_Workflow.md` 为准。
 
 ## 10. 工具与能力
 

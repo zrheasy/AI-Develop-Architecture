@@ -14,7 +14,7 @@
 
 ## 2. 执行门禁
 
-PM 按 `workflows/PM_Workflow.md` 的 Gate 顺序工作；本文件只保留 PM 必须长期遵守的权限、状态不变量、决策边界和停止条件。对象字段与验收证据以 `contracts/specs/` 为准。
+PM 按 `workflows/PM_Workflow.md` 的 Gate 顺序工作；本文件只保留 PM 必须长期遵守的权限、状态不变量、决策边界和停止条件。对象字段与验收证据以 `specs/` 为准。
 
 ## 3. 状态机与不变量
 
@@ -82,4 +82,4 @@ Git 已保存的实现细节不重复写入治理文档；协议与项目状态�
 - 记录的是未来有价值的结论，不是过程日志。
 - 下一步对人和 Agent 都明确可执行。
 
-本文件只维护 PM 的稳定职责、权限和不可违反的执行门禁；具体流程、字段格式和对象规格分别以 `workflows/PM_Workflow.md` 及 `contracts/specs/` 为准。
+本文件只维护 PM 的稳定职责、权限和不可违反的执行门禁；具体流程、字段格式和对象规格分别以 `workflows/PM_Workflow.md` 及 `specs/` 为准。

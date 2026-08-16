@@ -154,4 +154,4 @@ PM 退回时，依据具体 Failure Reason 修改当前 Task，修复后重新�
 - Commit、分支、合并目标、测试地址和验证信息已写入交付物；
 - ACTIVE.md 已更新为「审核中」，且未修改 INDEX.md 或 Task 文件。
 
-本文件只维护 Frontend Agent 的稳定职责、边界、前端工程门禁和交付要求；通用 Task 状态与流程以 `contracts/specs/Task_Specification.md`、`workflows/Agent_Workflow.md` 为准。
+本文件只维护 Frontend Agent 的稳定职责、边界、前端工程门禁和交付要求；通用 Task 状态与流程以 `specs/Task_Specification.md`、`workflows/Agent_Workflow.md` 为准。

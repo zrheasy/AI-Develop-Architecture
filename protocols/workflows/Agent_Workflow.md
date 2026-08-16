@@ -4,7 +4,7 @@
 
 **定位：** 所有非 PM Agent 的统一任务执行流程。Product、UI、Frontend、Backend、Mobile、QA 只在各自 contract 中补充领域门禁，不重复定义本流程。
 
-继承：`BASIC_MAPP.md`。角色职责、领域输入、专业验证和交付差异以 `contracts/agents/{Agent}.md` 为准；Task 字段和状态以 `contracts/specs/Task_Specification.md` 为准。
+继承：`BASIC_MAPP.md`。角色职责、领域输入、专业验证和交付差异以 `contracts/{Agent}.md` 为准；Task 字段和状态以 `specs/Task_Specification.md` 为准。
 
 ## 1. 工作空间边界
 
@@ -50,7 +50,7 @@ Agents/{Agent}/
 收到正式 Task 后，Agent 必须按以下最小顺序恢复上下文：
 
 1. 读取 `BASIC_MAPP.md`，确认最小工作协议；
-2. 读取自身 `contracts/agents/{Agent}.md`，确认职责和领域门禁；
+2. 读取自身 `contracts/{Agent}.md`，确认职责和领域门禁；
 3. 读取 `contracts/Agent_Shared_Contract.md`，确认权限和输出格式；
 4. 读取本文件，确认当前执行路径；
 5. 读取领域版 `PROJECT.md`，确认项目目标和边界；

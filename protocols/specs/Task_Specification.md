@@ -49,11 +49,12 @@ PM 在 `INDEX.md` 维护状态。Agent 不修改 `INDEX.md`，也不自行翻转
 ## ID
 TASK-XXX
 
-## Title
-
 ## Owner
 
 ## Goal
+
+## Status
+等待中 / 执行中 / 审核中 / 阻塞中 / 已完成。
 
 ## Context
 Feature:
@@ -83,6 +84,7 @@ PASS / FAIL
 ### 字段要求
 
 - `Goal`：说明任务要达成的结果。
+- `Status`：任务当前状态，。
 - `Context`：仅提供完成任务所需的背景、输入和约束。
 - `Risk Level`：标记任务风险等级，用于决定验证深度。
 - `QA Required`：说明是否需要 QA 参与，并记录判断理由。

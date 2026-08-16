@@ -11,7 +11,7 @@
 | 文件 | 维护者 | 作用 |
 |---|---|---|
 | 根目录 `PROJECT.md` | PM Agent | 项目级完整上下文，记录整个项目的目标、产品、范围和整体工程背景 |
-| `Agents/{Agent}/PROJECT.md` | 对应 Agent | 职责域上下文，只记录该 Agent 完成工作所需的信息 |
+| `Agents/{Agent}/PROJECT.md` | 对应 Agent | 职责域上下文，记录与该 Agent 工作相关的资料 |
 
 根目录 `PROJECT.md` 是项目级真相来源。Agent 工作空间中的 `PROJECT.md` 从根目录派生，但不是全文复制；领域版可以补充本职责域的稳定信息，不能与根目录的项目目标、边界和长期原则冲突。
 
@@ -46,18 +46,6 @@ PM 版记录完整的项目级信息，但不记录任务过程、开发日志�
 ## Product Context
 核心用户、主要场景和产品边界。
 
-## Technology Context
-技术栈、运行平台、系统组成和外部依赖的整体概览。
-
-## Architecture Overview
-系统主要组成、模块边界和关键关系；只记录稳定的整体结构。
-
-## Key Technologies
-关键技术选型及其当前用途；选型原因和替代方案记录在 DECISIONS.md。
-
-## Project Structure
-项目主要目录和资产的职责概览。
-
 ## Current Phase
 MVP / Growth / Maintenance 等。
 ```
@@ -74,7 +62,7 @@ PM 版可以包含所有影响项目协作的稳定项目级信息，但应遵�
 
 ## 3. Agent PROJECT.md（领域版）
 
-领域版只保留该 Agent 完成任务所需的项目上下文，不要求包含完整项目资料。
+领域版只保留该 Agent 所需的项目上下文，不要求包含完整项目资料。
 
 所有领域版至少包含：
 
@@ -82,16 +70,8 @@ PM 版可以包含所有影响项目协作的稳定项目级信息，但应遵�
 # Project Name — {Agent} Context
 
 ## Project Context
-与本职责域相关的项目目标、产品范围和边界。
+与本职责域相关的项目背景。
 
-## Domain Scope
-本 Agent 负责和不负责的范围。
-
-## Domain Principles
-本职责域必须长期遵守的原则。
-
-## Current Domain Context
-本职责域当前有效的稳定背景。
 ```
 
 根据 Agent 类型补充以下内容：
@@ -104,24 +84,6 @@ PM 版可以包含所有影响项目协作的稳定项目级信息，但应遵�
 | Backend | 后端架构、服务边界、数据与接口层次、关键技术选型、工程约束和外部依赖 |
 | Mobile | 移动端架构、平台边界、关键技术选型、工程约束和与后端/前端的集成边界 |
 | QA | 质量目标、测试策略、测试环境、自动化能力和验收边界 |
-
-### 开发 Agent 的额外结构
-
-Frontend、Backend、Mobile 的领域版必须包含：
-
-```markdown
-## Architecture Overview
-本职责域的模块、层次、边界和关键依赖。
-
-## Key Technologies
-当前采用的框架、语言、基础设施和工具，以及各自用途。
-
-## Engineering Constraints
-必须遵守的兼容性、安全性、性能、部署或代码约束。
-
-## Integration Boundaries
-与其他职责域或外部系统的稳定接口和责任边界。
-```
 
 领域版的架构和技术选型记录当前有效状态；选型原因、权衡、替代方案和跨领域影响记录在该 Agent 的 `DECISIONS.md`，需要项目级确认的决策再由 PM 纳入根目录 `DECISIONS.md`。
 

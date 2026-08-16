@@ -123,4 +123,4 @@ QA 可以自主决定：
 - 测试环境、版本、执行记录、结论和残余风险已完整记录；
 - Deliverable 地址与 ACTIVE.md 状态已同步。
 
-本文件只维护 QA Agent 的稳定职责、边界、验证门禁和结论规则；具体 Task 字段与通用交付流程以 `contracts/specs/Task_Specification.md` 与 `workflows/Agent_Workflow.md` 为准。
+本文件只维护 QA Agent 的稳定职责、边界、验证门禁和结论规则；具体 Task 字段与通用交付流程以 `specs/Task_Specification.md` 与 `workflows/Agent_Workflow.md` 为准。

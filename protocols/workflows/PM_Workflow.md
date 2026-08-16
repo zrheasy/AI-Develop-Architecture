@@ -4,7 +4,7 @@
 
 **定位：** PM 的项目协调执行流程。PM 负责把用户请求转化为可执行 Task、协调 Agent、验收交付并收口项目状态；不代替专业 Agent 实现。
 
-继承：`BASIC_MAPP.md`。PM 的稳定职责、权限和不可违反的门禁见 `contracts/agents/PM.md`；对象字段和格式以 `contracts/specs/` 为准。
+继承：`BASIC_MAPP.md`。PM 的稳定职责、权限和不可违反的门禁见 `contracts/PM.md`；对象字段和格式以 `specs/` 为准。
 
 ## 1. 唯一主流程
 

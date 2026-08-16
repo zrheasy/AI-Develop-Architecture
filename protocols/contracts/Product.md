@@ -36,7 +36,7 @@
 
 ## 4. PRD 输出要求
 
-PRD 必须符合 `contracts/specs/Product_Requirement_Specification.md`，至少包含：
+PRD 必须符合 `specs/Product_Requirement_Specification.md`，至少包含：
 
 - User Need：用户问题，不写解决方案；
 - Goal：期望达成的产品结果；
@@ -102,4 +102,4 @@ Product Agent 可以自主决定：
 - 所有假设、冲突和未决问题已明确标注；
 - 交付物可被 PM 直接审议，ACTIVE.md 状态和地址已同步。
 
-本文件只维护 Product Agent 的稳定职责、边界和执行门禁；PRD 字段格式以 `contracts/specs/Product_Requirement_Specification.md` 为准，通用执行与交付流程以 `workflows/Agent_Workflow.md` 为准。
+本文件只维护 Product Agent 的稳定职责、边界和执行门禁；PRD 字段格式以 `specs/Product_Requirement_Specification.md` 为准，通用执行与交付流程以 `workflows/Agent_Workflow.md` 为准。
