@@ -34,9 +34,10 @@ python -m mapp --project . init
 | `task commit <id> --hash ... --branch ... --target ... [--verification ...]` | 记录开发类 Commit 信息 |
 | `task show <id>` / `task list [--owner O] [--status S]` | 查询任务 |
 | `qa <id> --result PASS\|FAIL\|BLOCKED [--report path]` | 记录 QA 结论；BLOCKED 自动置任务阻塞 |
-| `status [--owner O]` | 查看 Agent 与任务状态（替代逐个读 ACTIVE / INDEX） |
-| `audit [--task id] [--limit N]` | 状态流转审计 |
-| `context <id>` | 最小上下文注入：Task 内容 + 引用输入 |
+| `status [--owner O] [--task id]` | 查看 Agent 与任务状态（`--task` 单查输出稳定，利于缓存） |
+| `audit [--task id] [--limit N] [--with-time]` | 状态流转审计（默认省略时间戳以保持前缀稳定） |
+| `context <id> [--fields ...] [--refs full\|summary\|none]` | 最小上下文注入：字段可选、引用分级 |
+| `ref show <ref> [--summary]` | 懒加载单个引用内容（Feature / PRD / Decision / 文件） |
 | `feature add/status/list/show/import` | Feature 入库管理（生命周期状态机强制） |
 | `prd add/status/list/show/import` | PRD 入库管理（DRAFT→APPROVED→ARCHIVED） |
 | `decision add/list/show/import` | Decision 入库管理 |
@@ -54,6 +55,6 @@ python -m mapp --project . init
 
 - 状态唯一权威：`.mapp/mapp.db`；任务列表通过 `mapp task list` 读取，不再生成 INDEX.md。
 - PM 通过 `mapp status --all` / `mapp audit` 监控，不逐个读取 Agent 的 ACTIVE.md。
-- Agent 通过 `mapp context <task-id>` 获取最小上下文，不自行阅读其他文档。
+- Agent 通过 `mapp context <task-id>` 获取任务本体（默认引用摘要，`mapp ref show` 懒加载细节），不自行阅读其他文档。
 - Feature / PRD / Decision 统一存于数据库；存量文件用对应 `import` 一次性导入后不再维护。
 - 规则与门禁定义见 `protocols/specs/Task_Specification.md`、`protocols/workflows/PM_Workflow.md`、`protocols/workflows/Agent_Workflow.md`。

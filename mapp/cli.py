@@ -344,6 +344,11 @@ def cmd_task_list(args):
 
 def cmd_status(args):
     conn, root = _get_conn(args)
+    if args.task:
+        row = _get_task(conn, args.task)
+        print(f"{row['owner']}: {label(row['status'])}（{row['id']} {row['title']}）")
+        conn.close()
+        return
     owners = [normalize_owner(args.owner)] if args.owner else list(AGENT_NAMES)
     for owner in owners:
         row = conn.execute("SELECT status, current_task FROM agents WHERE name = ?", (owner,)).fetchone()
@@ -380,7 +385,10 @@ def cmd_audit(args):
         frm = label(r["from_status"]) if r["from_status"] else "-"
         to = label(r["to_status"])
         reason = f" | {r['reason']}" if r["reason"] else ""
-        print(f"{r['created_at']} {r['task_id']} {frm} → {to} by {r['actor']}{reason}")
+        line = f"{r['task_id']} {frm} → {to} by {r['actor']}{reason}"
+        if args.with_time:
+            line = f"{r['created_at']} {line}"
+        print(line)
     conn.close()
 
 
@@ -389,7 +397,34 @@ def cmd_context(args):
     row = _get_task(conn, args.id)
     task = dict(row)
     task["owner"] = normalize_owner(row["owner"]) + " Agent"
-    print(ctx_mod.render_context(conn, root, task))
+    fields = None
+    if args.fields:
+        fields = [f.strip() for f in args.fields.split(",") if f.strip()]
+    print(ctx_mod.render_context(conn, root, task, fields=fields, refs_mode=args.refs))
+    conn.close()
+
+
+def cmd_ref_show(args):
+    """懒加载：单独输出一个引用的完整内容（--summary 只输出关键字段）。"""
+    conn, root = _get_conn(args)
+    db_result = ctx_mod._resolve_db_ref_full(conn, args.ref)
+    if db_result is not None:
+        content, kind, row = db_result
+        if args.summary:
+            print(ctx_mod._render_ref_summary(row, kind))
+        else:
+            print(content)
+        conn.close()
+        return
+    path = ctx_mod.resolve_ref(root, args.ref)
+    if path is None:
+        raise SystemExit(f"引用未找到: {args.ref}")
+    with open(path, encoding="utf-8") as fh:
+        content = fh.read().rstrip()
+    if args.summary:
+        print("\n".join([ln for ln in content.splitlines() if ln.strip()][:6]))
+    else:
+        print(content)
     conn.close()
 
 
@@ -786,16 +821,36 @@ def build_parser():
 
     p = sub.add_parser("status", help="查看 Agent 与任务状态")
     p.add_argument("--owner", default=None)
+    p.add_argument("--task", default=None, help="只查看单个任务状态（输出稳定，利于缓存）")
     p.set_defaults(func=cmd_status)
 
     p = sub.add_parser("audit", help="查看状态流转审计")
     p.add_argument("--task", default=None)
     p.add_argument("--limit", type=int, default=50)
+    p.add_argument("--with-time", action="store_true", help="附带时间戳（默认省略以保持前缀稳定）")
     p.set_defaults(func=cmd_audit)
 
-    p = sub.add_parser("context", help="输出任务的最小上下文（Task + 引用输入）")
+    p = sub.add_parser("context", help="输出任务的最小上下文（字段可选、引用分级注入）")
     p.add_argument("id")
+    p.add_argument(
+        "--fields",
+        default=None,
+        help="Task 字段白名单，逗号分隔：id,title,owner,goal,context,risk_level,qa,acceptance,deliverable",
+    )
+    p.add_argument(
+        "--refs",
+        choices=["full", "summary", "none"],
+        default="full",
+        help="引用注入模式：full=全文 / summary=摘要 / none=不注入（默认 full）",
+    )
     p.set_defaults(func=cmd_context)
+
+    ref = sub.add_parser("ref", help="懒加载引用内容（Feature / PRD / Decision / 文件）")
+    rsub = ref.add_subparsers(dest="ref_command", required=True)
+    p = rsub.add_parser("show", help="输出单个引用内容")
+    p.add_argument("ref", help="引用名（如 daily-events-digest / PR-001 / llm-provider / 相对路径）")
+    p.add_argument("--summary", action="store_true", help="只输出关键字段摘要")
+    p.set_defaults(func=cmd_ref_show)
 
     feature = sub.add_parser("feature", help="Feature 管理（数据库存储）")
     fsub = feature.add_subparsers(dest="feature_command", required=True)

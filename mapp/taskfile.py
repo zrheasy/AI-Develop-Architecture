@@ -47,42 +47,31 @@ def parse_task(text):
     }
 
 
-def render_task(task):
-    """从数据库字段生成任务 Markdown 文本（供 context / show 使用）。"""
-    lines = [
-        "# Task",
-        "",
-        "## ID",
-        task["id"],
-        "",
-        "## Title",
-        task["title"],
-        "",
-        "## Owner",
-        task["owner"],
-        "",
-        "## Goal",
-        task.get("goal") or "",
-        "",
-        "## Context",
-        task.get("context") or "",
-        "",
-        "## Risk Level",
-        task.get("risk_level") or "",
-        "",
-        "## QA Required",
-        task.get("qa_reason") or ("Yes" if task.get("qa_required") else "No"),
-        "",
-        "## Acceptance Criteria",
-        task.get("acceptance") or "",
-        "",
-        "## Deliverable",
-        task.get("deliverable_spec") or "",
-        "",
-        "## Review Result",
-        task.get("review_result") or "",
-        "",
-        "## Failure Reason",
-        task.get("failure_reason") or "",
-    ]
-    return "\n".join(lines)
+TASK_FIELD_KEYS = (
+    "id", "title", "owner", "goal", "context", "risk_level",
+    "qa", "acceptance", "deliverable", "review", "failure",
+)
+
+
+def render_task(task, fields=None):
+    """从数据库字段生成任务 Markdown 文本；fields 为 None 时输出全部字段。"""
+    allowed = set(fields) if fields is not None else None
+    parts = ["# Task", ""]
+
+    def add(key, heading, value):
+        if allowed is not None and key not in allowed:
+            return
+        parts.extend([heading, value or "", ""])
+
+    add("id", "## ID", task["id"])
+    add("title", "## Title", task["title"])
+    add("owner", "## Owner", task["owner"])
+    add("goal", "## Goal", task.get("goal") or "")
+    add("context", "## Context", task.get("context") or "")
+    add("risk_level", "## Risk Level", task.get("risk_level") or "")
+    add("qa", "## QA Required", task.get("qa_reason") or ("Yes" if task.get("qa_required") else "No"))
+    add("acceptance", "## Acceptance Criteria", task.get("acceptance") or "")
+    add("deliverable", "## Deliverable", task.get("deliverable_spec") or "")
+    add("review", "## Review Result", task.get("review_result") or "")
+    add("failure", "## Failure Reason", task.get("failure_reason") or "")
+    return "\n".join(parts)

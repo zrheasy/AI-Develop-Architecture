@@ -52,8 +52,8 @@ Agents/{Agent}/
 1. 读取 `BASIC_MAPP.md`、`contracts/Agent_Shared_Contract.md`、`workflows/Agent_Workflow.md`；
 2. 读取自身 `contracts/{Agent}.md` 与领域版 `PROJECT.md`，确认职责与项目边界；
 3. 通过 `mapp task list --owner {Agent} --status 执行中` 确认自己的执行中任务；返工只处理 PM 已退回的当前任务；
-4. 通过 `mapp context <task-id>` 获取最小上下文（Task 全文 + 引用输入），不阅读引用之外的文件；
-5. 仅在当前 Task 明确涉及且 mapp context 未包含时，才按需读取 `DECISIONS.md`、PRD、Feature 或接口契约。
+4. 通过 `mapp context <task-id>` 获取任务本体；引用默认走摘要（`--refs summary`），需要细节时用 `mapp ref show <ref>` 懒加载，不阅读引用之外的文件；
+5. 仅在当前 Task 明确涉及且懒加载后仍不足时，才按需读取 `DECISIONS.md`、PRD、Feature 或接口契约。
 
 以下情况不得开始执行：
 
@@ -90,13 +90,10 @@ Agents/{Agent}/
 
 ## 5. 上下文恢复点
 
-Agent 不依赖长期记忆维持协议合规。出现以下任一情况时，必须重新运行 `mapp context <task-id>` 和 `mapp task list --owner {Agent}`，必要时重新读取相关 contract：
+Agent 不依赖长期记忆维持协议合规。上下文恢复分两级，避免同一会话内重复全量注入：
 
-- 开始执行前；
-- 上下文压缩、会话恢复或长时间中断后；
-- 完成一段较长实现或验证后；
-- 任务范围、依赖、阻塞或下一步发生变化时；
-- 提交审核前。
+- **会话重建（上下文压缩 / 新会话 / 长时间中断后）**：完整恢复——运行 `mapp context <task-id> --refs summary` 获取任务本体与引用摘要，必要时重读相关 contract；
+- **会话内增量**：只查状态变化——`mapp status --task <task-id>` 或 `mapp task show <task-id>`，不重复运行完整 context；需要某引用细节时用 `mapp ref show <ref>` 懒加载。
 
 恢复时只确认五项：`Task`、`Goal`、`当前状态`、`下一步`、`禁止事项`。如果当前工作与其中任一项不一致，先暂停并反馈 PM。
 

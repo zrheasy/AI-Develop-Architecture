@@ -175,6 +175,24 @@ class MappFlowTest(unittest.TestCase):
         out = self.capture("audit", "--task", "TASK-BE-100")
         self.assertIn("无审计记录", out)
 
+    def test_audit_default_no_timestamp(self):
+        """audit 默认不带时间戳（前缀稳定）；--with-time 才输出。"""
+        self.add_task(BACKEND_TASK)
+        out = self.capture("audit", "--task", "TASK-BE-100")
+        self.assertIn("TASK-BE-100 - → 等待中 by PM", out)
+        self.assertNotIn("2026-", out.splitlines()[0])
+        out = self.capture("audit", "--task", "TASK-BE-100", "--with-time")
+        first = out.splitlines()[0]
+        self.assertIn("TASK-BE-100", first)
+
+    def test_status_single_task(self):
+        """status --task 单查输出稳定（利于缓存）。"""
+        self.add_task(BACKEND_TASK)
+        self.run_cli("task", "assign", "TASK-BE-100")
+        out = self.capture("status", "--task", "TASK-BE-100")
+        self.assertIn("Backend: 执行中（TASK-BE-100", out)
+        self.assertNotIn("任务统计", out)
+
     def test_dev_commit_gate(self):
         self.add_task(FRONTEND_TASK)
         self.run_cli("task", "assign", "TASK-FE-100")

@@ -18,14 +18,7 @@ PM 按 `workflows/PM_Workflow.md` 的 Gate 顺序工作；本文件只保留 PM 
 
 ## 3. 状态机与不变量
 
-Task 状态唯一权威是 `.mapp/mapp.db`，状态只允许沿以下路径变化，且只能通过 `mapp` 命令流转：
-
-```text
-等待中 → 执行中 → 审核中 → 已完成
-             ↘ 阻塞中 ↗
-
-审核失败：审核中 → 执行中
-```
+Task 状态唯一权威是 `.mapp/mapp.db`；状态机定义（状态、转移、门禁）以 `specs/Task_Specification.md` 为唯一权威，此处不重复定义。状态流转只能通过 `mapp` 命令执行，脚本强制校验转移与门禁。
 
 验收失败时，PM 通过 `mapp task fail --reason ...` 填写 `FAIL` 与 `Failure Reason` 并将任务置为「执行中」；Agent 完成返工后再次通过 `mapp task review` 提交「审核中」。
 

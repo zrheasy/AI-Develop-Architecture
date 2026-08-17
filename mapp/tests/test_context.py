@@ -16,7 +16,15 @@ class ContextTest(unittest.TestCase):
         os.makedirs(os.path.join(self.root, "tasks", "Backend"), exist_ok=True)
         os.makedirs(os.path.join(self.root, "decisions"), exist_ok=True)
         with open(os.path.join(self.root, "decisions", "llm-provider.md"), "w", encoding="utf-8") as fh:
-            fh.write("# LLM Provider\n\n选择 deepseek-v4-flash。\n")
+            fh.write(
+                "# LLM Provider\n\n"
+                "## Context\n"
+                "流水线需要 LLM 用于结构化抽取、聚类判定、评分、摘要生成与自动审核。\n\n"
+                "## Decision\n"
+                "统一使用 deepseek-v4-flash 作为模型。\n\n"
+                "## Impact\n"
+                "选择 deepseek-v4-flash；API Key 存放于 .env，不写入仓库。\n"
+            )
         main(["--project", self.root, "init"])
 
     def tearDown(self):
@@ -50,6 +58,31 @@ class ContextTest(unittest.TestCase):
         self.add_task(text)
         out = self.capture("context", "TASK-BE-100")
         self.assertIn("引用（未找到）: decisions/nonexistent.md", out)
+
+    def test_context_fields_filter(self):
+        """--fields 只输出白名单字段，去掉 Context / Acceptance 等大字段。"""
+        self.add_task(BACKEND_TASK)
+        out = self.capture("context", "TASK-BE-100", "--fields", "id,title,goal", "--refs", "none")
+        self.assertIn("## Goal", out)
+        self.assertNotIn("## Context", out)
+        self.assertNotIn("## Acceptance Criteria", out)
+
+    def test_context_refs_summary_and_none(self):
+        """--refs summary 只输出摘要；--refs none 完全不带引用。"""
+        self.add_task(BACKEND_TASK)
+        out = self.capture("context", "TASK-BE-100", "--refs", "summary")
+        self.assertIn("## 引用摘要: decisions/llm-provider.md", out)
+        self.assertNotIn("选择 deepseek-v4-flash", out)  # 摘要截断，不含末尾段落
+        out = self.capture("context", "TASK-BE-100", "--refs", "none")
+        self.assertNotIn("## 引用", out)  # 引用段落完全未注入
+
+    def test_ref_show_lazy_load(self):
+        """ref show 懒加载：单独输出引用全文 / 摘要。"""
+        self.add_task(BACKEND_TASK)
+        out = self.capture("ref", "show", "decisions/llm-provider.md")
+        self.assertIn("选择 deepseek-v4-flash", out)
+        out = self.capture("ref", "show", "decisions/llm-provider.md", "--summary")
+        self.assertNotIn("选择 deepseek-v4-flash", out)  # 摘要截断
 
     def test_context_resolves_db_feature_ref(self):
         """Context 的 Feature: 行从数据库解析，不依赖文件系统。"""

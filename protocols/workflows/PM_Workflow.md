@@ -123,14 +123,7 @@ Agent 不存在时按照系统的agent配置进行创建；已存在时复用，
 
 ## 8. Gate 6：执行监控与异常
 
-Task 状态由 `mapp` 在 `.mapp/mapp.db` 维护，允许路径为：
-
-```text
-等待中 → 执行中 → 审核中 → 已完成
-             ↘ 阻塞中 ↗
-
-审核失败：审核中 → 执行中
-```
+Task 状态由 `mapp` 在 `.mapp/mapp.db` 维护；状态机定义与转移门禁以 `specs/Task_Specification.md` 为唯一权威（此处不重复定义），由脚本强制校验。
 
 执行期间：
 
@@ -178,7 +171,7 @@ PM 必须在 Task 中记录 QA 是否需要及理由：
 
 QA Task 必须写明验证目标、排除范围、测试边界、证据要求和阻塞汇报条件。QA 不执行与验收目标无关的完整回归。
 
-QA 结论是 PM 验收的输入：`QA Required: Yes` 的 Task 没有 QA `PASS`，PM 不得验收通过；QA `BLOCKED` 时 PM 只能保持任务阻塞或补齐前置条件，不得视为通过。
+QA 结论是 PM 验收的输入，门禁规则以 `specs/Task_Specification.md` 为唯一权威（QA Required=Yes 无 PASS 不得验收；BLOCKED 只能保持阻塞）。
 
 ## 11. Gate 8：状态收口
 
