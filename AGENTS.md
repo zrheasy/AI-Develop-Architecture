@@ -11,17 +11,20 @@
 | 目录 / 文件 | 说明 | 维护者 |
 |---|---|---|
 | `PROJECT.md` / `ACTIVE.md` / `DECISIONS.md` / `CHANGELOG.md` | 项目级核心文件（全大写，协议身份标识） | PM |
-| `features/` | Feature 能力定义（小写，单数文件名，如 `global-events-feed.md`） | PM |
-| `tasks/{Agent}/` | 任务索引与任务文件（`INDEX.md` + `TASK-XXX.md`） | PM |
-| `requirements/` | Product Requirement（`PR-XXX.md`） | PM（落库） |
-| `decisions/` | 长期决策（小写文件名，如 `event-content-language.md`） | PM  |
+| `.mapp/mapp.db` | 状态库：Task / Feature / PRD / Decision 内容与状态统一存储 | PM |
+| `mapp/` | 工作流 CLI（Python 标准库）：状态机、门禁、审计、最小上下文注入 | PM |
+| `features/` | 存量 Feature 文件（一次性 `mapp feature import` 导入数据库后不再维护） | PM |
+| `tasks/{Agent}/` | 存量任务文件（一次性 `mapp task import` 导入数据库后不再维护） | PM |
+| `requirements/` | 存量 PRD 文件（一次性 `mapp prd import` 导入数据库后不再维护） | PM |
+| `decisions/` | 存量决策文件（一次性 `mapp decision import` 导入数据库后不再维护） | PM  |
 | `Agents/{Agent}/deliverables/` | 任务交付物，命名 `TASK-{Agent}-{序号}-{英文描述}.md` | 执行 Agent |
 | `Agents/{Agent}/` | Agent工作空间，由各Agent独立维护 | 执行 Agent |
 | `protocols/` | 协议文档（只读引用，项目级 git 不跟踪） | — |
 
 命名约定：
 
-- 目录统一全小写：`tasks/`、`features/`、`requirements/`、`decisions/`。
+- 目录统一全小写：`tasks/`、`features/`、`requirements/`、`decisions/`（仅作存量导入源）。
+- 对象内容与状态通过 `mapp` 命令读写数据库，不手工编辑 `.mapp/mapp.db`。
 - 任务 ID 格式：`TASK-{Agent}-{序号}`，如 `TASK-FE-001`。
 - 交付物文件名使用英文 kebab-case，如 `TASK-BE-001-api-spec.md`；文档内容保持中文。
 
