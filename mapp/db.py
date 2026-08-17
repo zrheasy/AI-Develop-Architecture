@@ -94,6 +94,14 @@ CREATE TABLE IF NOT EXISTS decisions (
     updated_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS releases (
+    version    TEXT PRIMARY KEY,
+    date       TEXT NOT NULL,
+    notes      TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS feature_events (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     feature     TEXT NOT NULL REFERENCES features(name),

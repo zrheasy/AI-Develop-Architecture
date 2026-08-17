@@ -41,6 +41,7 @@ python -m mapp --project . init
 | `feature add/status/list/show/import` | Feature 入库管理（生命周期状态机强制） |
 | `prd add/status/list/show/import` | PRD 入库管理（DRAFT→APPROVED→ARCHIVED） |
 | `decision add/list/show/remove/import` | Decision 入库管理（上限 50 条，`remove` 释放空间） |
+| `release add/list/show/remove` | 发布记录入库管理（替代 CHANGELOG.md） |
 
 ## 强制不变量
 

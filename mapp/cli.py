@@ -758,6 +758,68 @@ def cmd_decision_import(args):
         print(f"  - {item}")
 
 
+# ---------- Release ----------
+
+
+def cmd_release_add(args):
+    """发布记录入库：--version --date 必填，notes 从 stdin 读取（可空）。"""
+    conn, root = _get_conn(args)
+    if not (args.version or "").strip():
+        raise SystemExit("--version 必填")
+    if not (args.date or "").strip():
+        raise SystemExit("--date 必填（YYYY-MM-DD）")
+    if conn.execute("SELECT 1 FROM releases WHERE version = ?", (args.version,)).fetchone():
+        raise SystemExit(f"发布记录已存在: {args.version}")
+    notes = sys.stdin.read().strip()
+    now = db.now()
+    conn.execute(
+        "INSERT INTO releases(version, date, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+        (args.version, args.date, notes, now, now),
+    )
+    conn.commit()
+    conn.close()
+    print(f"已登记发布 {args.version}（{args.date}）")
+
+
+def cmd_release_list(args):
+    conn, root = _get_conn(args)
+    rows = conn.execute("SELECT version, date, notes FROM releases ORDER BY date DESC, version DESC").fetchall()
+    if not rows:
+        print("无发布记录")
+    else:
+        print("| Version | Date | Notes |")
+        print("|---|---|---|")
+        for r in rows:
+            note = r["notes"].replace("\n", " ")[:40] if r["notes"] else ""
+            print(f"| {r['version']} | {r['date']} | {note} |")
+    conn.close()
+
+
+def cmd_release_show(args):
+    conn, root = _get_conn(args)
+    row = conn.execute("SELECT * FROM releases WHERE version = ?", (args.version,)).fetchone()
+    if row is None:
+        raise SystemExit(f"发布记录不存在: {args.version}")
+    print(f"# Release {row['version']}")
+    print("")
+    print(f"Date: {row['date']}")
+    print("")
+    print("## Notes")
+    print(row["notes"] or "（无）")
+    conn.close()
+
+
+def cmd_release_remove(args):
+    conn, root = _get_conn(args)
+    row = conn.execute("SELECT 1 FROM releases WHERE version = ?", (args.version,)).fetchone()
+    if row is None:
+        raise SystemExit(f"发布记录不存在: {args.version}")
+    conn.execute("DELETE FROM releases WHERE version = ?", (args.version,))
+    conn.commit()
+    conn.close()
+    print(f"已删除发布记录 {args.version}")
+
+
 def build_parser():
     parser = argparse.ArgumentParser(
         prog="mapp",
@@ -924,6 +986,21 @@ def build_parser():
     p = dsub.add_parser("import", help="从目录导入存量 Decision 文件")
     p.add_argument("dir")
     p.set_defaults(func=cmd_decision_import)
+
+    release = sub.add_parser("release", help="发布记录管理（数据库存储）")
+    rsub = release.add_subparsers(dest="release_command", required=True)
+    p = rsub.add_parser("add", help="登记发布记录（notes 从 stdin 读取）")
+    p.add_argument("--version", required=True)
+    p.add_argument("--date", required=True, help="YYYY-MM-DD")
+    p.set_defaults(func=cmd_release_add)
+    p = rsub.add_parser("list", help="列出发布记录")
+    p.set_defaults(func=cmd_release_list)
+    p = rsub.add_parser("show", help="查看发布记录详情")
+    p.add_argument("version")
+    p.set_defaults(func=cmd_release_show)
+    p = rsub.add_parser("remove", help="删除发布记录")
+    p.add_argument("version")
+    p.set_defaults(func=cmd_release_remove)
 
     return parser
 

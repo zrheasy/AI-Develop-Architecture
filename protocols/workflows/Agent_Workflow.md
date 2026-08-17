@@ -21,7 +21,7 @@ Agents/{Agent}/
 
 协议文件位于 `protocols/`，只读引用，不复制、不修改。Agent 不得修改：
 
-- PM 治理域：`PROJECT.md`、根目录 `ACTIVE.md`、`DECISIONS.md`、`CHANGELOG.md`、`requirements/`、`features/`、`decisions/`、`.mapp/`；
+- PM 治理域：`PROJECT.md`、根目录 `ACTIVE.md`、`DECISIONS.md`、`requirements/`、`features/`、`decisions/`、`.mapp/`；
 - 其他 Agent 的工作空间；
 - 未被当前 Task 授权的代码、配置或长期决策。
 

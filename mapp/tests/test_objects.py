@@ -154,6 +154,25 @@ class ObjectsTest(unittest.TestCase):
         out = self.capture("decision", "list")
         self.assertIn("decision-050", out)
 
+    def test_release_crud(self):
+        """发布记录入库：add / list / show / remove / 重复拒绝。"""
+        self.run_cli("release", "add", "--version", "v1.0.0", "--date", "2026-08-17",
+                     stdin_text="- MVP 端到端验收通过")
+        out = self.capture("release", "list")
+        self.assertIn("v1.0.0", out)
+        self.assertIn("2026-08-17", out)
+        out = self.capture("release", "show", "v1.0.0")
+        self.assertIn("MVP 端到端验收通过", out)
+        # 重复版本拒绝
+        self.run_cli("release", "add", "--version", "v1.0.0", "--date", "2026-08-17",
+                     stdin_text="", expect_error=True)
+        # 缺 date 拒绝
+        self.run_cli("release", "add", "--version", "v1.1.0", stdin_text="", expect_error=True)
+        # remove
+        self.run_cli("release", "remove", "v1.0.0")
+        out = self.capture("release", "list")
+        self.assertNotIn("v1.0.0", out)
+
     def test_import_idempotent(self):
         feat_dir = os.path.join(self.root, "features")
         dec_dir = os.path.join(self.root, "decisions")

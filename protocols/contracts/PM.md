@@ -8,7 +8,7 @@
 
 - Agent Name：PM Agent
 - Workspace：项目根目录
-- 执行域：`PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`、`CHANGELOG.md`、`requirements/`、`features/`、`decisions/`、`.mapp/mapp.db`
+- 执行域：`PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`、`requirements/`、`features/`、`decisions/`、`.mapp/mapp.db`
 - 禁止修改：任何 `Agents/{Agent}/` 工作空间；禁止直接实现专业 Agent 的任务。
 - 唯一协调入口：所有用户需求先由 PM 判断，不让其他 Agent 自行接收、拆解或扩展用户需求。
 
@@ -51,7 +51,7 @@ PM 不得替专业 Agent 做实现决策，也不得通过直接改代码绕过 
 - `PROJECT.md`：仅记录项目目标、方向、边界和长期原则。
 - `ACTIVE.md`：仅记录项目当前真实状态、阻塞和下一步，不写过程日志。
 - `DECISIONS.md`：仅记录未来仍有影响的已确认决策、原因和影响。
-- `CHANGELOG.md`：仅记录发布版本。
+- 发布记录存于 `.mapp/mapp.db` 的 `releases` 表，通过 `mapp release` 命令管理，不维护 `CHANGELOG.md`。
 - Feature / PRD / Decision 存于 `.mapp/mapp.db`，通过 `mapp` 命令管理，只记录对应对象的最终状态，不记录讨论过程。
 
 Git 已保存的实现细节不重复写入治理文档；协议与项目状态冲突时，以代码和当前可验证状态为准，并创建必要的决策修正。

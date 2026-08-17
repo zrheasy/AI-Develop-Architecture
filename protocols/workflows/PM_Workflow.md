@@ -30,7 +30,7 @@ PM 收到用户请求后，必须按以下顺序推进：
 
 以下条件全部满足，才可进入需求接收：
 
-- `PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`、`CHANGELOG.md` 存在且内容有效；
+- `PROJECT.md`、`ACTIVE.md`、`DECISIONS.md` 存在且内容有效，`mapp init` 已完成；
 - `PROJECT.md` 的目标、边界和产品形态已明确，不存在「等待确认」；
 - 根目录的项目骨架已建立，且 `mapp init` 已完成；
 - 本次任务涉及的 Agent 工作空间已初始化并通过轻验收。
@@ -41,7 +41,7 @@ PM 收到用户请求后，必须按以下顺序推进：
 
 1. 在项目根目录初始化 git（已存在则跳过），并确保项目级仓库使用 `main` 作为唯一长期分支；
 2. 建立 `README`、四个核心文件骨架；Agent 工作空间由对应 Agent 通过初始化 Task 创建；
-3. 创建 `PROJECT.md`、`ACTIVE.md`、`DECISIONS.md`、`CHANGELOG.md` 骨架；
+3. 创建 `PROJECT.md`、`ACTIVE.md`、`DECISIONS.md` 骨架；
 4. 运行 `mapp init` 初始化状态库（`.mapp/mapp.db`）；
 5. 初始化 Product Agent 工作空间并轻验收；
 6. 派发需求分析 Task，获得 DRAFT PRD；
@@ -181,7 +181,7 @@ QA 结论是 PM 验收的输入，门禁规则以 `specs/Task_Specification.md` 
 - 根目录 `ACTIVE.md` 反映真实当前阶段、阻塞和下一步；
 - `DECISIONS.md` 只记录已确认且未来仍有影响的决策；
 - Feature、PRD、Task 状态与实际交付一致；
-- `CHANGELOG.md` 只在版本发布时更新；
+- 发布记录通过 `mapp release add` 登记，不维护 `CHANGELOG.md`；
 - 通过 `mapp status --all` 与 `mapp audit` 确认没有悬空依赖、无 Owner Task、未处理的审核或未记录的阻塞；
 - 下一步明确到具体 Agent、Task 或用户决策。
 
@@ -216,7 +216,7 @@ PM 可自主决定需求分类、Feature 是否创建、Task 拆分、Owner、�
 - 开发类 Agent 负责自身 workspace 的分支、commit、合并和冲突处理；PM 只检查分支状态、依赖、QA 结果和发布许可；
 - 相关 Task 全部验收通过后，PM 才可按 Feature 生命周期更新其状态并提交项目级 Feature 记录；
 - 用户验收通过后，PM 才执行项目级发布记录和远程推送；
-- 发布前必须确认工作区干净、QA 结论满足风险要求、`CHANGELOG.md` 已准备、无未处理阻塞。
+- 发布前必须确认工作区干净、QA 结论满足风险要求、`mapp release` 记录已准备、无未处理阻塞。
 
 ## 14. PM 完成检查
 
