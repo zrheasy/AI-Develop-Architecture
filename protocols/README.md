@@ -45,8 +45,8 @@ User Request → Product Requirement → Feature → Task → Deliverable
 
 只读取当前角色和当前任务所需的最小上下文，不通读无关文档。任务相关上下文由 `mapp context <task-id>` 注入（Task 内容 + 引用输入），不自行扩大阅读范围。
 
-- PM：`BASIC_MAPP.md` → `contracts/PM.md` → `contracts/Agent_Shared_Contract.md` → `workflows/PM_Workflow.md` → `PROJECT.md` → `ACTIVE.md` → 按需其他文档。
-- Agent：`BASIC_MAPP.md` → `contracts/{Agent}.md` → `contracts/Agent_Shared_Contract.md` → `workflows/Agent_Workflow.md` → `Agents/{Agent}/PROJECT.md` → `Agents/{Agent}/ACTIVE.md` → 按需其他文档。
+- PM：`BASIC_MAPP.md` → `contracts/Agent_Shared_Contract.md` → `contracts/PM.md` → `workflows/PM_Workflow.md` → `PROJECT.md` → `ACTIVE.md` → 按需其他文档。
+- Agent：`BASIC_MAPP.md` → `contracts/Agent_Shared_Contract.md` → `contracts/{Agent}.md` → `specs/Coding_Principles.md` → `workflows/Agent_Workflow.md` → `Agents/{Agent}/PROJECT.md` → `Agents/{Agent}/ACTIVE.md` → 按需其他文档。
 
 ---
 
@@ -59,7 +59,6 @@ User Request → Product Requirement → Feature → Task → Deliverable
 | 做重要决策 | `DECISIONS.md`|
 | PM 分配 Agent | `workflows/Agent_Directory.md` |
 | 交付说明格式与验收 | `specs/Delivery_Standards.md` |
-| 开发类编码准则 | `specs/Coding_Principles.md` |
 | 发布记录 | `CHANGELOG.md` |
 
 ---
