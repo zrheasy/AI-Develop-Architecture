@@ -44,7 +44,7 @@
 
 ## 4. 工程实现门禁
 
-实现必须满足：
+编码实现必须遵守 `specs/Coding_Principles.md`（AI 编码准则，唯一权威）；本门禁是后端领域的补充。实现必须满足：
 
 - Controller / Handler、业务逻辑、数据访问和外部服务适配职责清晰分离；
 - 业务规则不散落在 Controller，数据访问集中在明确的 Repository / Data Access 层；
