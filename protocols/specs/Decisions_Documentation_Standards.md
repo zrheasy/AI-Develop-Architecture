@@ -12,7 +12,7 @@
 
 # 2. 结构
 
-`DECISIONS.md` 只作为索引；详细决策统一存于 `.mapp/mapp.db` 的 `decisions` 表，通过 `mapp decision` 命令管理（`add` 从 stdin 登记、`list` / `show` 查询、`import` 导入存量文件）。存量 `decisions/<topic>.md` 文件可用 `mapp decision import` 一次性导入后不再维护。
+`DECISIONS.md` 只记录索引，不保存决策正文；详细决策统一存于 `.mapp/mapp.db` 的 `decisions` 表。产生新决策必须通过 `mapp decision add` 命令新增，禁止手工修改数据库或追加文件；查询用 `mapp decision list` / `show`，删除用 `mapp decision remove`。决策数量上限 50 条，达到上限后必须先删除不再有效的决策再新增。存量 `decisions/<topic>.md` 文件可用 `mapp decision import` 一次性导入后不再维护。
 
 stdin 提交内容格式：
 

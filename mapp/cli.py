@@ -668,9 +668,15 @@ def cmd_prd_import(args):
 # ---------- Decision ----------
 
 
+DECISION_LIMIT = 50
+
+
 def _insert_decision(conn, parsed, actor="PM"):
     if conn.execute("SELECT 1 FROM decisions WHERE topic = ?", (parsed["topic"],)).fetchone():
         raise SystemExit(f"Decision 已存在: {parsed['topic']}")
+    count = conn.execute("SELECT COUNT(*) FROM decisions").fetchone()[0]
+    if count >= DECISION_LIMIT:
+        raise SystemExit(f"Decision 数量已达上限 {DECISION_LIMIT} 条，请先用 `mapp decision remove <topic>` 删除不再有效的决策")
     now = db.now()
     conn.execute(
         "INSERT INTO decisions(topic, title, context, decision, impact, created_at, updated_at) "
@@ -712,6 +718,17 @@ def cmd_decision_show(args):
         raise SystemExit(f"Decision 不存在: {args.topic}")
     print(objects.render_decision(dict(row)))
     conn.close()
+
+
+def cmd_decision_remove(args):
+    conn, root = _get_conn(args)
+    row = conn.execute("SELECT * FROM decisions WHERE topic = ?", (args.topic,)).fetchone()
+    if row is None:
+        raise SystemExit(f"Decision 不存在: {args.topic}")
+    conn.execute("DELETE FROM decisions WHERE topic = ?", (args.topic,))
+    conn.commit()
+    conn.close()
+    print(f"已删除 Decision {args.topic}")
 
 
 def cmd_decision_import(args):
@@ -901,6 +918,9 @@ def build_parser():
     p = dsub.add_parser("show", help="查看 Decision 内容")
     p.add_argument("topic")
     p.set_defaults(func=cmd_decision_show)
+    p = dsub.add_parser("remove", help="删除 Decision（释放 50 条上限空间）")
+    p.add_argument("topic")
+    p.set_defaults(func=cmd_decision_remove)
     p = dsub.add_parser("import", help="从目录导入存量 Decision 文件")
     p.add_argument("dir")
     p.set_defaults(func=cmd_decision_import)

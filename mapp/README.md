@@ -40,7 +40,7 @@ python -m mapp --project . init
 | `ref show <ref> [--summary]` | 懒加载单个引用内容（Feature / PRD / Decision / 文件） |
 | `feature add/status/list/show/import` | Feature 入库管理（生命周期状态机强制） |
 | `prd add/status/list/show/import` | PRD 入库管理（DRAFT→APPROVED→ARCHIVED） |
-| `decision add/list/show/import` | Decision 入库管理 |
+| `decision add/list/show/remove/import` | Decision 入库管理（上限 50 条，`remove` 释放空间） |
 
 ## 强制不变量
 

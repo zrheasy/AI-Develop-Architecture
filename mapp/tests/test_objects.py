@@ -139,6 +139,21 @@ class ObjectsTest(unittest.TestCase):
         out = self.capture("decision", "show", topic)
         self.assertIn("统一使用 deepseek-v4-flash", out)
 
+    def test_decision_limit_50_and_remove(self):
+        """决策数量上限 50；remove 释放空间后可继续新增。"""
+        # 写入 50 条
+        for i in range(50):
+            self.run_cli("decision", "add", "--topic", f"decision-{i:03d}", stdin_text=DECISION_TEXT)
+        out = self.capture("decision", "list")
+        self.assertEqual(out.count("| decision-"), 50)
+        # 第 51 条被上限拒绝（topic 唯一，不会撞重复检查）
+        self.run_cli("decision", "add", "--topic", "decision-050", stdin_text=DECISION_TEXT, expect_error=True)
+        # remove 释放空间
+        self.run_cli("decision", "remove", "decision-000")
+        self.run_cli("decision", "add", "--topic", "decision-050", stdin_text=DECISION_TEXT)
+        out = self.capture("decision", "list")
+        self.assertIn("decision-050", out)
+
     def test_import_idempotent(self):
         feat_dir = os.path.join(self.root, "features")
         dec_dir = os.path.join(self.root, "decisions")

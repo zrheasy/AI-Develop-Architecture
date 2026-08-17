@@ -163,7 +163,7 @@ Agent 只维护自身 `ACTIVE.md`（领域目标、下一步与阻塞说明）�
 - `ACTIVE.md` 不再维护 Task Status 字段（以 mapp 为准），避免双写漂移；
 - 状态变化通过 mapp 命令完成（review / block / unblock），不在 `ACTIVE.md` 中重复记录状态；
 - 不记录工作日志、完整 Todo、讨论过程、已完成历史或技术细节；
-- 产生未来仍影响领域工作的稳定决策时，记录到自身 `DECISIONS.md`，并将跨领域决策升级 PM；
+- 产生未来仍影响领域工作的稳定决策时，通过 `mapp decision add` 新增（自身 `DECISIONS.md` 只记录索引，不保存正文），并将跨领域决策升级 PM；决策数量上限 50 条；
 - 长期设计、产品、测试或工程资产沉淀到 `workspace/`，不要把交付物当作长期知识库。
 
 ## 11. 协作与异常
