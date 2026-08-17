@@ -94,7 +94,7 @@
 | Product | 「变更范围」改为「关键产品决策」（≤ 3 条）；「验证证据」改为「产品分析依据」 | 未决问题 | PRD 草案地址 + 决策摘要，不附技术方案 | `Agents/Product/workspace/` |
 | UI | 无 | 页面结构与层级；关键交互与状态；组件与视觉规则；响应式适配；实现注意事项 | 设计稿链接 + 关键状态截图（每状态 1 张，≤ 6 张） | `Agents/UI/workspace/` |
 | Frontend | 开发类附加 | 测试地址与启动方式、测试账号（任务涉及时） | 构建与浏览器检查结果摘要，不复制源代码 | `Agents/Frontend/workspace/` |
-| Backend | 开发类附加 | API 变更摘要（路径 / 方法 / 关键变化）；数据变更摘要（迁移 / 回滚）；接口文档链接 | 接口与迁移验证摘要，完整 API 文档放 workspace 附链接 | `Agents/Backend/workspace/` |
+| Backend | 开发类附加 | API 变更摘要（路径 / 方法 / 关键变化）；数据变更摘要（迁移 / 回滚）；OpenAPI 文档地址 | 接口与迁移验证摘要；OpenAPI 文档放 workspace 并暴露运行时可访问地址 | `Agents/Backend/workspace/` |
 | Mobile | 开发类附加 | 构建产物地址；验证设备与系统版本 | 构建产物 + 设备验证记录 | `Agents/Mobile/workspace/` |
 | QA | 使用 4.2 专用模板 | 见 4.2 | 测试报告 + 缺陷报告 | `Agents/QA/deliverables/` |
 
